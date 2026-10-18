@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PERRI · 界面样式</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="workspace">
+<header class="site-bar"><div class="site-bar-inner"><a class="brand" href="#conversation">PERRI</a><nav aria-label="主导航" id="navigation"></nav><span class="account">Master</span></div></header>
+<div class="desk">
+<div class="review-toolbar"><span>样式稿 02 <span class="muted">· 示例数据</span></span><div><button class="text-button" data-action="surface-toggle" aria-pressed="true">模拟动效：开</button><span class="divider">|</span><a href="../v0.1/index.html" target="_blank" rel="noopener">对比上一版 ↗</a></div></div>
+<header class="topbar"><span id="breadcrumb">对话</span><div class="top-actions"><button class="icon-button" data-action="search" aria-label="搜索样式稿" title="搜索样式稿 · ⌘ K"></button><button class="icon-button" data-action="notifications" aria-label="通知" title="通知"><span class="notification-dot"></span></button></div></header>
+<main id="main"></main>
+<footer class="statusbar"><span>PERRI <b> / </b> 本地样式稿，未连接服务</span><span>界面 · 02</span></footer>
+</div></div>
+<dialog id="dialog" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title"></h2><button class="icon-button" data-action="close" aria-label="关闭">×</button></div><div id="dialog-content"></div></dialog>
+<div id="toast" role="status"></div>
+<script src="prototype.js"></script>
+</body></html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PERRI · 样式探索</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="workspace">
+      <aside class="sidebar">
+        <a class="brand" href="#conversation"
+          >PERRI<span class="register-mark" aria-hidden="true"></span
+        ></a>
+        <div class="edition">
+          PERSONAL WORKSPACE<br /><span>私人工作空间</span>
+        </div>
+        <nav aria-label="主导航" id="navigation"></nav>
+        <div class="side-bottom">
+          <span class="muted">界面样式探索 / 04</span>
+        </div>
+      </aside>
+      <div class="desk">
+        <header class="topbar">
+          <span id="breadcrumb">工作空间 <span>/</span> 对话</span>
+          <div class="top-actions">
+            <div class="preview-controls">
+              <button
+                class="text-button"
+                data-action="theme-toggle"
+                aria-pressed="false"
+              >
+                深色模式</button
+              ><button
+                class="text-button"
+                data-action="surface-toggle"
+                aria-pressed="true"
+              >
+                模拟动效：开</button
+              ><a href="versions/v0.3/index.html" target="_blank" rel="noopener"
+                >对比基准版 ↗</a
+              >
+            </div>
+            <button
+              class="icon-button"
+              data-action="search"
+              aria-label="搜索样式稿"
+              title="搜索样式稿 · ⌘ K"
+            ></button
+            ><button
+              class="icon-button"
+              data-action="notifications"
+              aria-label="通知"
+              title="通知"
+            >
+              <span class="notification-dot"></span>
+            </button>
+          </div>
+        </header>
+        <main id="main"></main>
+        <footer class="statusbar">
+          <span><i></i>本地样式预览 · 未连接后端</span
+          ><span>样式预览 <b> / </b> v0.4</span>
+        </footer>
+      </div>
+    </div>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div class="dialog-head">
+        <h2 id="dialog-title"></h2>
+        <button class="icon-button" data-action="close" aria-label="关闭">
+          ×
+        </button>
+      </div>
+      <div id="dialog-content"></div>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <script src="prototype.js"></script>
+  </body>
+</html>
