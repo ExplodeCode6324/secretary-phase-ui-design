@@ -26,7 +26,20 @@ function host() {
 class Node {
   constructor(tag) {
     this.tag = tag;
-    this.style = {};
+    this.style = {
+      getPropertyValue(key) {
+        return this[key] || "";
+      },
+      getPropertyPriority() {
+        return "";
+      },
+      setProperty(key, value) {
+        this[key] = value;
+      },
+      removeProperty(key) {
+        delete this[key];
+      },
+    };
     this.animations = [];
     this.attrs = {};
     this.children = [];
@@ -67,24 +80,34 @@ class Node {
     return this.disabled || false;
   }
   closest(s) {
-    if (s === ".static-sample") return null;
+    if (s === ".static-sample" || s === ".glyph,.identity-phase,.divider-phase")
+      return null;
     if (s === "nav") return this.nav ? {} : null;
     if (s === ".composer-box") return this.composer ? this : null;
     return this;
   }
   getBoundingClientRect() {
-    return { width: this.width || 24, height: this.height || 24 };
+    return {
+      left: 0,
+      top: 0,
+      right: this.width || 24,
+      bottom: this.height || 24,
+      width: this.width || 24,
+      height: this.height || 24,
+    };
   }
   querySelector(s) {
     return (
       walk(this).find((n) =>
-        s === ".glyph"
-          ? n.tag === "glyph"
-          : s === ".icon-body"
-            ? n.tag === "body"
-            : s === ".signal-layer"
-              ? n.tag === "layer"
-              : false,
+        s === ".phase-source"
+          ? n.tag === "source"
+          : s === ".glyph"
+            ? n.tag === "glyph"
+            : s === ".icon-body"
+              ? n.tag === "body"
+              : s === ".signal-layer"
+                ? n.tag === "layer"
+                : false,
       ) || null
     );
   }
@@ -115,21 +138,28 @@ function harness() {
   let seq = 0,
     observer;
   const media = Object.assign(host(), { matches: false });
-  const body = {
+  const body = Object.assign(new Node("document-body"), {
     blocked: false,
     matches() {
       return this.blocked;
     },
-  };
+  });
   const document = Object.assign(host(), {
     body,
     hidden: false,
+    createElement(tag) {
+      return new Node(tag);
+    },
     createElementNS(_ns, tag) {
       return new Node(tag);
     },
   });
   const window = Object.assign(host(), {
     matchMedia: () => media,
+    getComputedStyle: () => ({
+      backgroundColor: "rgb(80,80,80)",
+      getPropertyValue: () => "0",
+    }),
     setTimeout(fn) {
       timers.set(++seq, fn);
       history.set(seq, fn);
@@ -505,4 +535,60 @@ test("activity rail glyphs use the same three-frame hover lifecycle", () => {
     assert.equal(h.layer.children.length, 0);
     assert.equal(h.timers.size, 0);
   }
+});
+
+test("identity owns three display layers per frame and cancels hidden source", () => {
+  const h = harness();
+  h.control.setAttribute("data-phase-type", "identity");
+  h.control.classes.add("study-trigger");
+  const source = new Node("source");
+  source.textContent = "PERRI";
+  h.control.append(source);
+  h.controller.setFrameCount(3);
+  h.controller.setFreeze(true);
+  for (let i = 0; i < 3; i++) {
+    h.controller.setFreezeFrame(i);
+    h.fire("pointerover");
+    const groups = walk(h.control).filter(
+      (n) => n.className === "identity-frame",
+    );
+    assert.equal(groups.length, 3);
+    assert.ok(groups.every((g) => g.children.length === 3));
+    assert.equal(source.style.visibility, "hidden");
+    assert.deepEqual(
+      groups.map((g) => {
+        const a = g.animations[0];
+        return a.frames
+          .filter((f) => f.offset <= a.currentTime / a.options.duration)
+          .at(-1).opacity;
+      }),
+      [0, 1, 2].map((n) => (n === i ? 1 : 0)),
+    );
+  }
+  h.fire("pointerout");
+  assert.equal(source.style.visibility, "");
+  assert.equal(
+    walk(h.control).filter((n) => n.className === "identity-phase").length,
+    0,
+  );
+  assert.equal(h.timers.size, 0);
+});
+test("divider replaces its real line and scroll cancellation restores exact style", () => {
+  const h = harness();
+  h.control.width = 196;
+  h.control.height = 1;
+  h.control.classes.add("nav-separator");
+  h.control.style.setProperty("background-color", "rgb(80,80,80)");
+  h.fire("pointermove", { clientX: 40, clientY: 0 });
+  assert.equal(
+    h.control.style.getPropertyValue("background-color"),
+    "transparent",
+  );
+  assert.equal(h.timers.size, 1);
+  h.fire("scroll");
+  assert.equal(
+    h.control.style.getPropertyValue("background-color"),
+    "rgb(80,80,80)",
+  );
+  assert.equal(h.timers.size, 0);
 });

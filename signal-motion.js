@@ -534,9 +534,294 @@
         frame: freezeFrame + 1,
       });
     }
+    function identity(c) {
+      const source = c.querySelector(".phase-source");
+      if (!source) return;
+      const effect = begin(
+        c,
+        180,
+        freeze && c.classList.contains("study-trigger"),
+      );
+      if (!effect) return;
+      const layer = document.createElement("span");
+      layer.className = "identity-phase";
+      layer.setAttribute("aria-hidden", "true");
+      c.append(layer);
+      source.style.visibility = "hidden";
+      effect.cleanup.push(() => {
+        source.style.visibility = "";
+        layer.remove();
+      });
+      const positions = [27, 57, 12];
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      for (let i = 0; i < frameCount; i++) {
+        const group = document.createElement("span");
+        group.className = "identity-frame";
+        group.setAttribute("data-identity-frame", i + 1);
+        const y = positions[i],
+          height = i === 2 ? 8 : 13;
+        for (const part of ["base", "slice", "echo"]) {
+          const copy = document.createElement("span");
+          copy.className = `identity-copy identity-${part}`;
+          copy.textContent = source.textContent;
+          if (part === "base") {
+            copy.style.maskImage = `linear-gradient(to bottom,#000 0%,#000 ${y}%,transparent ${y}%,transparent ${y + height}%,#000 ${y + height}%,#000 100%)`;
+          } else {
+            copy.style.clipPath = `inset(${y}% 0 ${100 - y - height}% 0)`;
+            copy.style.transform = `translateX(${direction * [1.8, -1.4, 0.8][i] * (part === "echo" ? -0.5 : 1)}px)`;
+          }
+          group.append(copy);
+        }
+        layer.append(group);
+        effect.animate(
+          group,
+          [
+            { opacity: i === 0 ? 1 : 0, offset: 0 },
+            ...(i ? [{ opacity: 1, offset: (i * 0.8) / frameCount }] : []),
+            { opacity: 0, offset: ((i + 1) * 0.8) / frameCount },
+            { opacity: 0, offset: 1 },
+          ],
+          180,
+        );
+      }
+      // Restore the original for the final 20%, without an empty frame.
+      effect.animate(
+        source,
+        [
+          { visibility: "hidden", offset: 0 },
+          { visibility: "visible", offset: 0.8 },
+          { visibility: "visible", offset: 1 },
+        ],
+        180,
+      );
+    }
+    let dividerBox = null,
+      dividerTarget = null,
+      lastProbe = 0;
+    const dividerCooldown = new WeakMap();
+    function divider(c, edge, box, color) {
+      if (!enabled(c) || fixedScheme === 3 || active.has(c)) return;
+      const now = Date.now();
+      if (now - (dividerCooldown.get(c) || 0) < 700) return;
+      if (dividerTarget) clear(dividerTarget);
+      dividerTarget = c;
+      dividerBox = box;
+      dividerCooldown.set(c, now);
+      const effect = begin(
+        c,
+        150,
+        freeze && c.classList.contains("divider-study"),
+      );
+      if (!effect) return;
+      const horizontal = box.width >= box.height;
+      const length = horizontal ? box.width : box.height;
+      const start = length * (0.2 + Math.random() * 0.55);
+      const segment = Math.min(18, length * 0.14);
+      const svg = el(document, "svg", {
+        viewBox: `0 0 ${box.width} ${box.height}`,
+        class: "divider-phase",
+        "aria-hidden": "true",
+        focusable: "false",
+      });
+      Object.assign(svg.style, {
+        left: `${box.left}px`,
+        top: `${box.top}px`,
+        width: `${box.width}px`,
+        height: `${box.height}px`,
+        color,
+      });
+      document.body.append(svg);
+      const prop =
+        edge === "background" ? "background-color" : `border-${edge}-color`;
+      const old = c.style.getPropertyValue(prop),
+        priority = c.style.getPropertyPriority(prop);
+      if (edge === "pseudo") c.classList.add("divider-pseudo-hidden");
+      else c.style.setProperty(prop, "transparent", "important");
+      effect.cleanup.push(() => {
+        svg.remove();
+        c.classList.remove("divider-pseudo-hidden");
+        if (edge !== "pseudo") {
+          if (old) c.style.setProperty(prop, old, priority);
+          else c.style.removeProperty(prop);
+        }
+        if (dividerTarget === c) {
+          dividerTarget = null;
+          dividerBox = null;
+        }
+      });
+      const band = horizontal
+        ? { x: start, y: -3, width: segment, height: 7 }
+        : { x: -3, y: start, width: 7, height: segment };
+      const dx = (Math.random() < 0.5 ? -1 : 1) * (horizontal ? 0.5 : 1.1);
+      let linePath = horizontal ? `M0 .5H${box.width}` : `M.5 0V${box.height}`;
+      const selected =
+        c.classList.contains("sidebar") &&
+        c.querySelector('[aria-current="page"]');
+      if (!horizontal && selected) {
+        const r = selected.getBoundingClientRect();
+        linePath = `M.5 0V${Math.max(0, r.top - box.top)} M.5 ${Math.min(box.height, r.bottom - box.top)}V${box.height}`;
+      }
+      mountFault(
+        document,
+        svg,
+        [linePath],
+        {
+          kind: 0,
+          frameCount,
+          duration: 150,
+          band,
+          secondBand: {
+            ...band,
+            [horizontal ? "x" : "y"]: Math.max(0, start - segment * 1.4),
+          },
+          thirdBand: {
+            ...band,
+            [horizontal ? "x" : "y"]: Math.min(
+              length - segment,
+              start + segment,
+            ),
+          },
+          dx,
+          dy: horizontal ? 1 : 0,
+          residueWidth: 0.7,
+        },
+        { width: box.width, height: box.height },
+        effect.animate,
+        true,
+        1,
+      );
+    }
+    function probeDivider(e) {
+      if (Date.now() - lastProbe < 50) return;
+      lastProbe = Date.now();
+      if (dividerTarget && dividerBox) {
+        const b = dividerBox;
+        if (
+          e.clientX >= b.left - 7 &&
+          e.clientX <= b.left + b.width + 7 &&
+          e.clientY >= b.top - 7 &&
+          e.clientY <= b.top + b.height + 7
+        )
+          return;
+        clear(dividerTarget);
+      }
+      const nav = e.target.closest?.("nav");
+      if (nav)
+        for (const line of nav.querySelectorAll(".nav-separator")) {
+          const r = line.getBoundingClientRect();
+          if (
+            e.clientX >= r.left &&
+            e.clientX <= r.right &&
+            Math.abs(e.clientY - r.top) < 8
+          ) {
+            divider(
+              line,
+              "background",
+              { left: r.left, top: r.top, width: r.width, height: 1 },
+              "var(--line)",
+            );
+            return;
+          }
+        }
+      let c = e.target;
+      for (
+        let depth = 0;
+        c && c !== document.body && depth < 9;
+        depth++, c = c.parentElement
+      ) {
+        if (c.closest?.(".glyph,.identity-phase,.divider-phase")) continue;
+        const r = c.getBoundingClientRect();
+        if (r.width < 40 && r.height < 40) continue;
+        if (
+          !c.classList.contains("nav-separator") &&
+          !c.classList.contains("conversation-title") &&
+          Math.min(
+            Math.abs(e.clientX - r.left),
+            Math.abs(e.clientX - r.right),
+            Math.abs(e.clientY - r.top),
+            Math.abs(e.clientY - r.bottom),
+          ) > 7
+        )
+          continue;
+        const style = window.getComputedStyle(c);
+        if (c.classList.contains("nav-separator")) {
+          divider(
+            c,
+            "background",
+            { left: r.left, top: r.top, width: r.width, height: 1 },
+            style.backgroundColor,
+          );
+          return;
+        }
+        if (c.classList.contains("conversation-title")) {
+          const width = parseFloat(window.getComputedStyle(c, "::after").width);
+          if (
+            width > 0 &&
+            e.clientX >= r.right - width &&
+            Math.abs(e.clientY - (r.top + r.height / 2)) < 8
+          ) {
+            divider(
+              c,
+              "pseudo",
+              {
+                left: r.right - width,
+                top: r.top + r.height / 2,
+                width,
+                height: 1,
+              },
+              "var(--line)",
+            );
+            return;
+          }
+        }
+        // Actual structural borders only; controls keep their own feedback.
+        if (c.matches("button,input,textarea,a,.avatar")) continue;
+        for (const side of ["top", "bottom", "left", "right"]) {
+          const size = parseFloat(
+            style.getPropertyValue(`border-${side}-width`),
+          );
+          const color = style.getPropertyValue(`border-${side}-color`);
+          if (
+            !size ||
+            size > 2 ||
+            color === "transparent" ||
+            color === "rgba(0, 0, 0, 0)"
+          )
+            continue;
+          const horizontal = side === "top" || side === "bottom";
+          const axis =
+            side === "bottom"
+              ? r.bottom - 1
+              : side === "right"
+                ? r.right - 1
+                : side === "top"
+                  ? r.top
+                  : r.left;
+          if (Math.abs((horizontal ? e.clientY : e.clientX) - axis) > 7)
+            continue;
+          divider(
+            c,
+            side,
+            {
+              left: horizontal ? r.left : axis,
+              top: horizontal ? axis : r.top,
+              width: horizontal ? r.width : 1,
+              height: horizontal ? 1 : r.height,
+            },
+            color,
+          );
+          return;
+        }
+      }
+      if (dividerTarget) clear(dividerTarget);
+    }
     function play(c, activation = false) {
       clear(c);
       if (!enabled(c) || fixedScheme === 3) return;
+      if (c.getAttribute("data-phase-type") === "identity") {
+        identity(c);
+        return;
+      }
       // The approved v0.3 arrow is an explicit exception, owned by this same cancellable effect.
       if (c.classList.contains("send-launch")) {
         sendEffect(c);
@@ -588,7 +873,7 @@
         frame: freezeFrame + 1,
       });
     }
-    const target = (e) => e.target.closest?.("button,a");
+    const target = (e) => e.target.closest?.("button,a,[data-phase-type]");
     function contact(c) {
       if (!contacts.has(c)) contacts.set(c, { hover: false, focus: false });
       return contacts.get(c);
@@ -656,6 +941,10 @@
           if (type === "focusout") box.classList.remove("submitted-focus");
         }
       });
+    listen(document, "pointermove", probeDivider);
+    listen(document, "pointerleave", clearAll);
+    listen(window, "resize", clearAll);
+    listen(document, "scroll", clearAll, true);
     listen(document, "pointercancel", clearAll);
     listen(window, "blur", clearAll);
     listen(document, "visibilitychange", () => {
