@@ -226,8 +226,6 @@ function render() {
         `${idx === 5 ? '<div class="nav-separator"></div>' : ""}<a href="#${id}" aria-label="${label}" title="${label}" ${id === current ? 'class="active" aria-current="page"' : ""}>${icon(i)}<span class="nav-label">${label}</span>${id === "attention" ? '<span class="count">' + (pendingAttention ? "02" : "00") + "</span>" : ""}</a>`,
     )
     .join("");
-  document.querySelector("#breadcrumb").innerHTML =
-    `工作空间 <span>/</span> ${pages.find((p) => p[0] === current)[1]}`;
   const switching = renderedPage !== current;
   main.innerHTML = `<div class="page ${switching ? "page-enter" : ""}">${views[current]()}</div>`;
   document.querySelector("#activity-content").innerHTML = activityContent();

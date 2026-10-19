@@ -8,3 +8,5 @@
 - 新增收起/展开图标使用共享三帧pointerover生命周期；测试验证两个图标均创建三组故障层，移出清理节点与计时器。浏览器确认鼠标收起、Enter展开、草稿保留、aria-expanded与hidden同步。侧栏切换不重建消息及输入DOM。
 - collapsed.png为桌面收起状态；light.png/dark.png为最新展开状态。
 - 未建立Tauri应用，未测原生CPU/GPU/功耗；性能结论和测量边界见TAURI-MOTION-COST.md。
+
+黑灰微调：浏览器computed background确认主体rgb(0,0,0)，左右侧栏均rgb(20,20,20)。1440px视口顶部横线与主体边缘均为[196,1170]。品牌说明与顶部面包屑已从DOM移除；浅/深色、收起及窄屏截图已更新。语法、资源和diff检查通过。

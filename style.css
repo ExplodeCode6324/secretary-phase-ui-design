@@ -1678,18 +1678,18 @@ dialog[open] {
 /* Theme changes colors only. No alternate layout or font sizes. */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #1e2227;
-  --surface: #252a30;
-  --field: #252a30;
+  --paper: #000000;
+  --surface: #141414;
+  --field: #000000;
   --ink: #e0e4e8;
   --muted: #a1a9b2;
-  --line: #444b53;
+  --line: #363636;
   --blue: #79acd9;
   --light-blue: #b1d5ec;
   --red: #ed8791;
   --green: #92bfa3;
-  --wash: #2c3239;
-  --soft: #333b44;
+  --wash: #1c1c1c;
+  --soft: #232323;
   --body-copy: #c2cad3;
   --pressed: #334b60;
 }
@@ -1752,8 +1752,8 @@ html[data-theme="dark"] .success {
   color: var(--green);
 }
 html[data-theme="dark"] .wireframe {
-  --paper: #202327;
-  --surface: #25292e;
+  --paper: #000000;
+  --surface: #141414;
   --ink: #eee;
   --muted: #b5b5b5;
   --line: #666;
@@ -2302,4 +2302,47 @@ html[data-theme="dark"] .send-launch {
 .activity-collapsed .activity-inner {
   overflow: hidden;
   scrollbar-gutter: auto;
+}
+
+/* Full-width structural rules; inset only the contents. */
+.topbar,
+.statusbar {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 36px;
+  padding-right: 36px;
+}
+.topbar {
+  justify-content: flex-end;
+}
+.sidebar nav {
+  margin-top: 66px;
+}
+.nav-separator {
+  margin-left: 0;
+  margin-right: 0;
+}
+@media (min-width: 1600px) {
+  .topbar,
+  .statusbar {
+    padding-left: 55px;
+    padding-right: 55px;
+  }
+}
+@media (max-width: 1100px) {
+  .topbar,
+  .statusbar {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+}
+@media (max-width: 600px) {
+  .topbar,
+  .statusbar {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .sidebar nav {
+    margin-top: 32px;
+  }
 }
