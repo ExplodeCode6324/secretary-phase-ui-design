@@ -1,7 +1,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const vm = require("node:vm");
 const fs = require("node:fs");
+const vm = require("node:vm");
 const { plan, createController } = require("../signal-motion.js");
 const source = fs.readFileSync(
   require("node:path").join(__dirname, "../prototype.js"),
@@ -9,7 +9,7 @@ const source = fs.readFileSync(
 );
 const geometry = vm.runInNewContext(
   source.slice(0, source.indexOf("const escapeHTML")) +
-    "; JSON.parse(JSON.stringify(geometry))",
+    ";JSON.parse(JSON.stringify(geometry))",
 );
 function host() {
   const listeners = {};
@@ -23,10 +23,92 @@ function host() {
     },
   };
 }
+class Node {
+  constructor(tag) {
+    this.tag = tag;
+    this.attrs = {};
+    this.children = [];
+    this.classes = new Set();
+    this.dataset = {};
+    this.isConnected = true;
+    this.classList = {
+      add: (...ns) => ns.forEach((n) => this.classes.add(n)),
+      remove: (...ns) => ns.forEach((n) => this.classes.delete(n)),
+      contains: (n) => this.classes.has(n),
+    };
+  }
+  setAttribute(k, v) {
+    this.attrs[k] = String(v);
+  }
+  getAttribute(k) {
+    return this.attrs[k] ?? null;
+  }
+  removeAttribute(k) {
+    delete this.attrs[k];
+  }
+  append(...nodes) {
+    for (const n of nodes) {
+      n.parent = this;
+      this.children.push(n);
+    }
+  }
+  remove() {
+    this.parent.children = this.parent.children.filter((c) => c !== this);
+  }
+  replaceChildren() {
+    this.children = [];
+  }
+  contains(n) {
+    return n === this || this.children.some((c) => c.contains(n));
+  }
+  matches() {
+    return this.disabled || false;
+  }
+  closest(s) {
+    if (s === ".static-sample") return null;
+    if (s === "nav") return this.nav ? {} : null;
+    if (s === ".composer-box") return this.composer ? this : null;
+    return this;
+  }
+  getBoundingClientRect() {
+    return { width: this.width || 24, height: this.height || 24 };
+  }
+  querySelector(s) {
+    return (
+      walk(this).find((n) =>
+        s === ".glyph"
+          ? n.tag === "glyph"
+          : s === ".icon-body"
+            ? n.tag === "body"
+            : s === ".signal-layer"
+              ? n.tag === "layer"
+              : false,
+      ) || null
+    );
+  }
+  animate(frames, options) {
+    return {
+      frames,
+      options,
+      finished: Promise.resolve(),
+      cancelled: false,
+      paused: false,
+      cancel() {
+        this.cancelled = true;
+      },
+      pause() {
+        this.paused = true;
+      },
+    };
+  }
+}
+function walk(n) {
+  return [n, ...n.children.flatMap(walk)];
+}
 function harness() {
   const timers = new Map(),
     history = new Map();
-  let id = 0,
+  let seq = 0,
     observer;
   const media = Object.assign(host(), { matches: false });
   const body = {
@@ -38,37 +120,19 @@ function harness() {
   const document = Object.assign(host(), {
     body,
     hidden: false,
-    createElementNS() {
-      return {
-        attributes: {},
-        setAttribute(k, v) {
-          this.attributes[k] = v;
-        },
-        classList: { add() {} },
-        animate(frames, options) {
-          const a = {
-            frames,
-            options,
-            cancelled: false,
-            finished: Promise.resolve(),
-            cancel() {
-              this.cancelled = true;
-            },
-          };
-          return a;
-        },
-      };
+    createElementNS(_ns, tag) {
+      return new Node(tag);
     },
   });
   const window = Object.assign(host(), {
     matchMedia: () => media,
     setTimeout(fn) {
-      timers.set(++id, fn);
-      history.set(id, fn);
-      return id;
+      timers.set(++seq, fn);
+      history.set(seq, fn);
+      return seq;
     },
-    clearTimeout(i) {
-      timers.delete(i);
+    clearTimeout(id) {
+      timers.delete(id);
     },
     MutationObserver: class {
       constructor(fn) {
@@ -78,193 +142,228 @@ function harness() {
       disconnect() {}
     },
   });
-  const control = {
-    isConnected: true,
-    disabled: false,
-    dataset: {},
-    classes: new Set(),
-    layer: [],
-    matches() {
-      return this.disabled;
-    },
-    closest() {
-      return this;
-    },
-    contains(other) {
-      return other === this;
-    },
-    removeAttribute(name) {
-      if (name === "data-signal-scheme") delete this.dataset.signalScheme;
-    },
-    querySelectorAll() {
-      return [
-        {
-          replaceChildren: () => {
-            this.layer = [];
-          },
-        },
-      ];
-    },
-    querySelector() {
-      return {
-        dataset: { glyph: "attention" },
-        getBoundingClientRect: () => ({ width: 22 }),
-        querySelector: () => ({ append: (p) => this.layer.push(p) }),
-      };
-    },
-  };
-  // closest('.static-sample') is a membership check; event target lookup is separate.
-  control.closest = () => null;
-  control.classList = {
-    add: (...names) => names.forEach((n) => control.classes.add(n)),
-    remove: (...names) => names.forEach((n) => control.classes.delete(n)),
-  };
-  const target = { closest: () => control };
+  const control = new Node("button"),
+    glyph = new Node("glyph"),
+    original = new Node("body"),
+    layer = new Node("layer");
+  glyph.dataset.glyph = "attention";
+  glyph.append(original, layer);
+  control.append(glyph);
   const fire = (type, extra = {}) =>
-    document.dispatch(type, { target, relatedTarget: null, ...extra });
+    document.dispatch(type, { target: control, relatedTarget: null, ...extra });
   const controller = createController({ document, window, geometry });
   return {
+    control,
+    original,
+    layer,
     document,
     window,
-    control,
-    fire,
-    controller,
+    media,
     timers,
     history,
-    media,
+    fire,
+    controller,
     observe: () => observer(),
   };
 }
-test("all glyphs sample only their exact stable body paths, bounded size and linewidth", () => {
-  for (const shape of Object.values(geometry))
-    for (const size of [14, 16, 18, 22, 24, 32])
-      for (let scheme = 0; scheme < 4; scheme++) {
-        const p = plan(shape, size, scheme);
-        assert.equal(p.fragments.length, size <= 18 ? 1 : 2);
-        assert.ok(p.duration <= 600);
-        for (const f of p.fragments) {
-          assert.ok(shape.body.includes(f.d));
-          assert.ok(f.start + f.length <= 100);
-          assert.ok(f.width <= 2.8);
-          assert.ok((Math.abs(f.dx) * size) / 24 <= 6.7);
-          if (size <= 18) assert.ok(f.width <= 1);
-        }
+test("fixed plans deterministic; auto resolves randomness once, within actual CSS px/time limits", () => {
+  for (const [name, g] of Object.entries(geometry))
+    for (const size of [16, 22, 24, 32])
+      for (const kind of [0, 1, 2]) {
+        const a = plan({ ...g, name }, size, kind, () => {
+          throw Error("fixed plans must not randomize");
+        });
+        assert.ok(a.duration >= 160 && a.duration <= 360);
+        assert.ok((Math.abs(a.dx) * size) / 24 <= 3);
+        assert.ok(g.body.includes(a.dropout.d));
+        assert.ok(a.dropout.start + a.dropout.length <= 100);
       }
+  let calls = 0;
+  const p = plan(geometry.search, 24, -1, () => {
+    calls++;
+    return 0.8;
+  });
+  assert.equal(p.kind, 2);
+  assert.equal(calls, 4);
 });
-test("four finite asymmetric schemes; randomness resolved before playback", () => {
-  const plans = [0, 0.26, 0.51, 0.76].map((n) =>
-    plan(geometry.attention, 22, -1, () => n),
+test("A replaces full bottom image with masked base plus clipped translated real geometry", () => {
+  const h = harness();
+  h.controller.setScheme(0);
+  h.fire("pointerover");
+  assert.equal(h.original.getAttribute("visibility"), "hidden");
+  const nodes = walk(h.layer);
+  assert.equal(nodes.filter((n) => n.attrs.class === "source-gap").length, 1);
+  assert.equal(nodes.filter((n) => n.tag === "clipPath").length, 1);
+  assert.ok(nodes.find((n) => n.attrs.class === "rendered-base").attrs.mask);
+  assert.equal(
+    nodes.filter((n) => n.attrs.class === "signal-residue").length,
+    0,
   );
-  assert.deepEqual(
-    plans.map((p) => p.scheme),
-    [0, 1, 2, 3],
+  for (const n of nodes.filter((n) => n.tag === "path"))
+    assert.ok(geometry.attention.body.includes(n.attrs.d));
+  h.controller.clearAll();
+  assert.equal(h.original.getAttribute("visibility"), null);
+  assert.equal(h.layer.children.length, 0);
+});
+test("B subtracts real stroke segments via black mask, without displaced copies", () => {
+  const h = harness();
+  h.controller.setScheme(1);
+  h.fire("click");
+  const nodes = walk(h.layer);
+  assert.equal(h.original.getAttribute("visibility"), "hidden");
+  const hole = nodes.find((n) => n.attrs.class === "dropout-hole");
+  assert.equal(hole.attrs.stroke, "black");
+  assert.ok(hole.attrs["stroke-dasharray"]);
+  assert.equal(
+    nodes.filter((n) => n.attrs.class === "displaced-slice").length,
+    0,
   );
-  assert.equal(new Set(plans.map((p) => JSON.stringify(p.fragments))).size, 4);
-  for (const p of plans)
-    assert.notEqual(p.fragments[0].delay, p.fragments[1].delay);
 });
-test("helper rays, reticles, trails are not body geometry", () => {
-  assert.equal(geometry.attention.body.length, 2);
-  assert.equal(geometry.search.body.length, 2);
-  assert.equal(geometry.send.body.length, 2);
-  assert.ok(!JSON.stringify(geometry).includes("M2 8v5 M22 8v5"));
+test("C combines subtraction and slicing, monochrome removes only auxiliary residue", () => {
+  const h = harness();
+  h.controller.setScheme(2);
+  h.fire("click");
+  assert.ok(walk(h.layer).some((n) => n.attrs.class === "signal-residue"));
+  h.controller.setMonochrome(true);
+  h.fire("click");
+  const nodes = walk(h.layer);
+  assert.ok(nodes.some((n) => n.attrs.class === "source-gap"));
+  assert.ok(nodes.some((n) => n.attrs.class === "dropout-hole"));
+  assert.ok(!nodes.some((n) => n.attrs.class === "signal-residue"));
 });
-test("hover and focus merge; activation replaces instead of stacking", () => {
+test("same-contact hover/focus merges, replacement generation defeats old timer", () => {
   const h = harness();
   h.fire("pointerover");
-  const first = [...h.timers.keys()][0];
-  assert.equal(h.control.layer.length, 2);
+  const old = [...h.history.values()][0],
+    first = [...h.timers.keys()][0];
   h.fire("focusin");
   assert.equal([...h.timers.keys()][0], first);
-  assert.equal(h.timers.size, 1);
-  h.fire("click");
-  assert.equal(h.timers.size, 1);
-  assert.equal(h.control.layer.length, 2);
-  assert.notEqual([...h.timers.keys()][0], first);
-  h.controller.clearAll();
-  assert.equal(h.control.layer.length, 0);
-  assert.equal(h.timers.size, 0);
-});
-test("old callbacks cannot clear a replacement; exit and reentry work", () => {
-  const h = harness();
-  h.fire("pointerover");
-  const old = [...h.history.values()][0];
   h.fire("click");
   old();
-  assert.equal(h.control.layer.length, 2);
-  h.fire("pointerout");
-  assert.equal(h.control.layer.length, 0);
-  assert.equal(h.timers.size, 0);
-  h.fire("pointerover");
-  assert.equal(h.control.layer.length, 2);
+  assert.equal(h.original.getAttribute("visibility"), "hidden");
+  assert.equal(h.timers.size, 1);
+  [...h.timers.values()][0]();
+  assert.equal(h.original.getAttribute("visibility"), null);
+  assert.equal(h.layer.children.length, 0);
 });
-test("press, drag-out and focus loss clean without dispatching business clicks", () => {
+test("cancel, exit, blur, disable, removal and dynamic mode switch restore full source and remove timers", () => {
+  for (const reason of [
+    "pointerout",
+    "focusout",
+    "pointercancel",
+    "blur",
+    "disable",
+    "detach",
+    "off",
+    "reduce",
+  ]) {
+    const h = harness();
+    h.fire("pointerover");
+    if (["pointerout", "focusout", "pointercancel"].includes(reason))
+      h.fire(reason);
+    if (reason === "blur") h.window.dispatch("blur");
+    if (reason === "disable") {
+      h.control.disabled = true;
+      h.observe();
+    }
+    if (reason === "detach") {
+      h.control.isConnected = false;
+      h.observe();
+    }
+    if (reason === "off") {
+      h.document.body.blocked = true;
+      h.observe();
+    }
+    if (reason === "reduce") {
+      h.media.matches = true;
+      h.media.dispatch("change");
+    }
+    assert.equal(h.original.getAttribute("visibility"), null, reason);
+    assert.equal(h.layer.children.length, 0, reason);
+    assert.equal(h.timers.size, 0, reason);
+  }
+});
+test("press-drag-out never synthesizes click; disabled and static modes never hide source", () => {
   const h = harness();
   let clicks = 0;
   h.document.addEventListener("click", () => clicks++);
   h.fire("pointerover");
   h.fire("pointerdown");
-  assert.equal(h.control.layer.length, 0);
   h.fire("pointerout");
   h.fire("pointerup");
   assert.equal(clicks, 0);
-  assert.equal(h.timers.size, 0);
-  h.fire("focusin");
-  h.fire("focusout");
-  assert.equal(h.control.layer.length, 0);
+  h.controller.setScheme(3);
   h.fire("click");
   assert.equal(clicks, 1);
+  assert.equal(h.original.getAttribute("visibility"), null);
 });
-test("disable, detach, motion-off, OS reduce and blur cancel all active effects", () => {
-  for (const mode of ["disabled", "detached", "off", "reduce", "blur"]) {
-    const h = harness();
-    h.fire("pointerover");
-    if (mode === "disabled") h.control.disabled = true;
-    if (mode === "detached") h.control.isConnected = false;
-    if (mode === "off") h.document.body.blocked = true;
-    if (mode === "reduce") {
-      h.media.matches = true;
-      h.media.dispatch("change");
-    }
-    if (mode === "blur") h.window.dispatch("blur");
-    else h.observe();
-    assert.equal(h.control.layer.length, 0, mode);
-    assert.equal(h.timers.size, 0, mode);
-  }
-});
-test("blocked mode does not schedule decoration; enabling does not replay old input", () => {
+test("debug freeze applies only to samples, cancels without residue and does not queue playback", () => {
   const h = harness();
-  h.document.body.blocked = true;
-  h.fire("pointerover");
+  h.control.classes.add("study-trigger");
+  h.controller.setFreeze(true);
+  h.fire("click");
   assert.equal(h.timers.size, 0);
-  h.document.body.blocked = false;
-  h.observe();
-  assert.equal(h.timers.size, 0);
+  assert.equal(h.original.getAttribute("visibility"), "hidden");
   h.fire("pointerout");
-  h.fire("pointerover");
-  assert.equal(h.timers.size, 1);
+  assert.equal(h.original.getAttribute("visibility"), null);
+  h.controller.setFreeze(false);
+  assert.equal(h.timers.size, 0);
 });
-test("current CSS has no body animation/scale scripts", () => {
+test("submit replaces actual border without mutating input nodes; repeated submit cancels old overlay", () => {
+  const h = harness();
+  const box = new Node("div");
+  box.composer = true;
+  box.width = 600;
+  box.height = 120;
+  const input = new Node("textarea");
+  box.append(input);
+  h.controller.submit(box);
+  assert.ok(box.classes.has("boundary-fault"));
+  assert.equal(box.children[0], input);
+  assert.equal(box.children.length, 2);
+  h.controller.submit(box);
+  assert.equal(box.children.length, 2);
+  assert.equal(h.timers.size, 1);
+  h.document.dispatch("focusout", { target: box, relatedTarget: null });
+  assert.equal(box.children.length, 1);
+  assert.ok(!box.classes.has("boundary-fault"));
+});
+test("navigation boundary fault replaces lines but preserves aria-current and full row", () => {
+  const h = harness();
+  h.control.nav = true;
+  h.control.width = 196;
+  h.control.height = 45;
+  h.control.setAttribute("aria-current", "page");
+  h.controller.navigation(h.control);
+  assert.equal(h.control.getAttribute("aria-current"), "page");
+  assert.ok(h.control.classes.has("boundary-fault"));
+  h.controller.clearAll();
+  assert.ok(!h.control.classes.has("boundary-fault"));
+  assert.equal(h.control.getAttribute("aria-current"), "page");
+});
+test("no scale/rotation/body spring scripts; send uses incremental append and native IME guard", () => {
   const css = fs.readFileSync(
     require("node:path").join(__dirname, "../style.css"),
     "utf8",
   );
-  assert.ok(!css.includes("scale(.82)") && !css.includes("scale(0.82)"));
-  for (const old of [
-    "bell-field",
+  for (const obsolete of [
+    "send-shaft",
+    "send-head",
+    "nav-phase-a",
+    "scale(.82)",
     "clapper",
     "lens-sample",
-    "corner-unfold",
-    "transmit-head",
-    "sample-left",
-    "sample-right",
   ])
-    assert.ok(!css.includes(old), old);
-});
-
-test("multiple signal fragments have independently assigned thick and thin strokes", () => {
-  const a = plan(geometry.attention, 24, 0, () => 0.1),
-    b = plan(geometry.attention, 24, 0, () => 0.9);
-  assert.ok(a.fragments[0].width > a.fragments[1].width);
-  assert.ok(b.fragments[0].width < b.fragments[1].width);
+    assert.ok(!css.includes(obsolete));
+  const submit = source.slice(
+    source.indexOf('document.addEventListener("submit"'),
+    source.indexOf('document.addEventListener("keydown"'),
+  );
+  const message = submit.slice(
+    0,
+    submit.indexOf('if (e.target.id === "task-form")'),
+  );
+  assert.ok(!message.includes("render();"));
+  assert.ok(message.includes("restoreMessages(sentMessages.slice(-1))"));
+  assert.ok(source.includes("!e.isComposing"));
 });

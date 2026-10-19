@@ -1,4 +1,4 @@
-/* Display-only sampling. No body path is mutated or animated. */
+/* Display-only sampling. Bodies stay fixed except the explicitly retained composer send animation. */
 (function (root) {
   const schemes = [
     {
@@ -57,22 +57,32 @@
         ? Math.min(3, Math.floor(random() * 4))
         : Math.max(0, Math.min(3, scheme));
     const config = schemes[index];
-    const variation = scheme < 0 ? random() : 0.5;
+    const variation = random();
+    const thickFirst = random() < 0.5;
     const count = size <= 18 ? 1 : 2;
-    const amplitude = size <= 18 ? 1.3 : size <= 24 ? 2 : 2.6; // SVG units; up to 3.5 CSS px at 32px.
+    const amplitude = size <= 18 ? 1.8 : size <= 24 ? 4 : 5; // Up to 6.7 CSS px at 32px.
     const fragments = config.regions.slice(0, count).map((region, i) => {
       const [part, start, length] = shape.regions[region];
       return {
         d: shape.body[part],
         part,
         start,
-        length: Math.max(8, length - (variation < 0.5 ? 3 : 0)),
+        length: Math.min(100 - start, length + Math.round(variation * 9)),
         dx: config.offset[i][0] * amplitude,
         dy: config.offset[i][1] * amplitude,
         delay: config.delay[i] + Math.round(variation * 25),
         duration: config.span[i],
-        width: size <= 18 ? Math.min(1, config.widths[i]) : config.widths[i],
-        opacity: size <= 18 ? 0.45 : config.colors[i] === "light" ? 0.58 : 0.65,
+        width:
+          size <= 18
+            ? 1
+            : i === (thickFirst ? 0 : 1)
+              ? variation < 0.5
+                ? 2.4
+                : 2.8
+              : variation < 0.5
+                ? 0.7
+                : 1.0,
+        opacity: size <= 18 ? 0.65 : config.colors[i] === "light" ? 0.9 : 0.95,
         color: config.colors[i],
         align: config.align[i],
       };
@@ -198,7 +208,10 @@
         () => {
           if (active.get(c) === effect) clear(c);
         },
-        Math.max(duration, activation ? 360 : 640) + 20,
+        Math.max(
+          duration,
+          c.classList.contains?.("send-launch") ? 850 : activation ? 360 : 640,
+        ) + 20,
       );
       if (glyph) onSample({ scheme: selected, count, duration });
     }
@@ -276,6 +289,7 @@
     });
     return {
       clearAll,
+      feedback(control) { if (control) play(control, true); },
       setScheme(value) {
         fixedScheme = value;
         clearAll();
