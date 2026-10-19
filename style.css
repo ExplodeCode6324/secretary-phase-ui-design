@@ -1441,7 +1441,7 @@ dialog[open] {
   }
 }
 
-/* v0.4: retain v0.3 geometry; give each surface the same reconstruction grammar. */
+/* Retain confirmed geometry; give each surface the same reconstruction grammar. */
 :root {
   --field: #fffcf6;
   --soft: #e4e1da;
@@ -1993,7 +1993,7 @@ textarea::placeholder {
   }
 }
 
-/* v0.7: full-width directory rows connect to the document surface. */
+/* full-width directory rows connect to the document surface. */
 :root {
   --sidebar-paper: var(--paper);
   --document-paper: var(--surface);
@@ -2119,7 +2119,7 @@ nav a.boundary-fault:not(.active)::after {
   pointer-events: none;
 }
 
-/* v0.8: the send surface itself is reconstructed; label and hit target stay put. */
+/* the send surface itself is reconstructed; label and hit target stay put. */
 .send-launch {
   --send-fill: var(--ink);
   isolation: isolate;
@@ -2177,7 +2177,7 @@ html[data-theme="dark"] .send-launch {
   font: inherit;
 }
 
-/* v0.9: every vertical rule belongs to a complete module boundary. */
+/* every vertical rule belongs to a complete module boundary. */
 .margin-notes {
   border: 0;
   padding: 0;
@@ -2350,10 +2350,11 @@ html[data-theme="dark"] .send-launch {
 /* Identity: the same type stays anchored; only sampled display layers change. */
 .brand {
   padding: 4px 6px;
-  border: 1px solid var(--blue);
-  box-shadow:
-    -2px 0 var(--blue),
-    2px 1px var(--light-blue);
+  border: 0;
+  box-shadow: none;
+  text-shadow:
+    -1px 0 var(--blue),
+    1px 0.5px var(--light-blue);
   width: fit-content;
 }
 [data-phase-type="identity"] {
@@ -2430,5 +2431,10 @@ html[data-theme="dark"] .identity-studies .avatar.assistant {
   border-top: 1px solid var(--line);
   height: 24px;
 }
-.identity-studies .study-trigger span { font: inherit; color: inherit; }
-.identity-studies .identity-copy.identity-echo { color: var(--blue); }
+.identity-studies .study-trigger span {
+  font: inherit;
+  color: inherit;
+}
+.identity-studies .identity-copy.identity-echo {
+  color: var(--blue);
+}

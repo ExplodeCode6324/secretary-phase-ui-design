@@ -822,7 +822,7 @@
         identity(c);
         return;
       }
-      // The approved v0.3 arrow is an explicit exception, owned by this same cancellable effect.
+      // The approved send arrow is an explicit exception, owned by this same cancellable effect.
       if (c.classList.contains("send-launch")) {
         sendEffect(c);
         return;
