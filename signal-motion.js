@@ -346,11 +346,15 @@
       active.set(c, effect);
       c.classList.add("is-simulating");
       effect.animate = (node, frames, span, easing = "steps(1,end)") => {
-        const a = node.animate(frames, {
-          duration: span,
-          easing,
-          fill: "both",
-        });
+        const discrete = easing === "steps(1,end)";
+        const a = node.animate(
+          discrete ? frames.map((frame) => ({ ...frame, easing })) : frames,
+          {
+            duration: span,
+            easing: discrete ? "linear" : easing,
+            fill: "both",
+          },
+        );
         a.finished.catch(() => {});
         effect.animations.push(a);
         if (held) {

@@ -446,3 +446,21 @@ test("freeze selector targets two distinct logical frames without replaying old 
   h.controller.setFreezeFrame(0);
   assert.equal(h.layer.children.length, 0);
 });
+
+// Effect-level steps(1,end) collapses the entire timeline to frame one.
+test("discrete frames step per segment while the effect timeline remains linear", () => {
+  const h = harness();
+  h.control.classes.add("study-trigger");
+  h.controller.setFreeze(true);
+  h.controller.setFreezeFrame(1);
+  h.fire("click");
+  const groups = walk(h.layer).filter((n) => n.attrs.class === "fault-frame");
+  const visible = groups.map((group) => {
+    const a = group.animations[0];
+    assert.equal(a.options.easing, "linear");
+    assert.ok(a.frames.every((frame) => frame.easing === "steps(1,end)"));
+    const progress = a.currentTime / a.options.duration;
+    return a.frames.filter((frame) => frame.offset <= progress).at(-1).opacity;
+  });
+  assert.deepEqual(visible, [0, 1]);
+});
