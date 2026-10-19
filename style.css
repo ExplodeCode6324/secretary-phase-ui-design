@@ -2216,3 +2216,90 @@ html[data-theme="dark"] .send-launch {
     margin: 0;
   }
 }
+
+/* Accepted three-frame baseline: one continuous activity rail. */
+.workspace.has-activity {
+  grid-template-columns: 196px minmax(0, 1fr) 270px;
+}
+.workspace.has-activity.activity-collapsed {
+  grid-template-columns: 196px minmax(0, 1fr) 48px;
+}
+#activity-rail {
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  background: var(--sidebar-paper);
+  align-self: stretch;
+}
+#activity-rail[hidden],
+#activity-content[hidden] {
+  display: none;
+}
+.activity-inner {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.activity-header {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+#activity-toggle {
+  flex: 0 0 32px;
+}
+#activity-content {
+  padding: 28px 24px;
+}
+#activity-rail .note-section {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0 0 38px;
+}
+.conversation-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 1100px) {
+  .workspace.has-activity {
+    grid-template-columns: 166px minmax(0, 1fr) 230px;
+  }
+  .workspace.has-activity.activity-collapsed {
+    grid-template-columns: 166px minmax(0, 1fr) 48px;
+  }
+  #activity-content {
+    padding: 24px 18px;
+  }
+}
+@media (max-width: 850px) {
+  .workspace.has-activity,
+  .workspace.has-activity.activity-collapsed {
+    grid-template-columns: 166px minmax(0, 1fr) 48px;
+  }
+  #activity-rail {
+    position: relative;
+    z-index: 5;
+  }
+  .has-activity:not(.activity-collapsed) .activity-inner {
+    position: fixed;
+    right: 0;
+    width: min(270px, calc(100vw - 64px));
+    border-left: 1px solid var(--line);
+    background: var(--sidebar-paper);
+  }
+}
+@media (max-width: 600px) {
+  .workspace.has-activity,
+  .workspace.has-activity.activity-collapsed {
+    grid-template-columns: 64px minmax(0, 1fr) 48px;
+  }
+}
+.activity-inner {
+  overflow-x: hidden;
+}
+.activity-collapsed .activity-inner {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}

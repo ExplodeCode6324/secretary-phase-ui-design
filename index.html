@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>PERRI · 样式探索</title>
-    <link rel="stylesheet" href="style.css?v=09r1" />
+    <link rel="stylesheet" href="style.css?v=09r2" />
   </head>
   <body>
     <div class="workspace">
@@ -59,6 +59,21 @@
           ><span>样式预览 <b> / </b> v0.9</span>
         </footer>
       </div>
+      <aside id="activity-rail" aria-label="当前活动" hidden>
+        <div class="activity-inner">
+          <header class="activity-header">
+            <button
+              id="activity-toggle"
+              class="icon-button"
+              data-action="activity-toggle"
+              aria-controls="activity-content"
+              aria-expanded="true"
+              aria-label="收起活动栏"
+            ></button>
+          </header>
+          <div id="activity-content"></div>
+        </div>
+      </aside>
     </div>
     <dialog id="dialog" aria-labelledby="dialog-title">
       <div class="dialog-head">
@@ -70,7 +85,7 @@
       <div id="dialog-content"></div>
     </dialog>
     <div id="toast" role="status"></div>
-    <script src="signal-motion.js?v=09r1"></script>
-    <script src="prototype.js?v=09r1"></script>
+    <script src="signal-motion.js?v=09r2"></script>
+    <script src="prototype.js?v=09r2"></script>
   </body>
 </html>

@@ -2,6 +2,22 @@
 // Body paths never include helper rays, reticles, trails, or animation-only marks.
 // Sampling regions refer to normalized portions of these exact body paths.
 const geometry = {
+  collapseRail: {
+    body: ["M4 4h16v16H4z", "M15 4v16", "M8 8l4 4-4 4"],
+    regions: [
+      [0, 10, 20],
+      [1, 20, 35],
+      [2, 10, 40],
+    ],
+  },
+  expandRail: {
+    body: ["M4 4h16v16H4z", "M15 4v16", "M11 8l-4 4 4 4"],
+    regions: [
+      [0, 10, 20],
+      [1, 20, 35],
+      [2, 10, 40],
+    ],
+  },
   attention: {
     body: ["M12 3a6 6 0 0 0-6 6v6l-2 3h16l-2-3V9a6 6 0 0 0-6-6", "M10 21h4"],
     regions: [
@@ -214,6 +230,8 @@ function render() {
     `工作空间 <span>/</span> ${pages.find((p) => p[0] === current)[1]}`;
   const switching = renderedPage !== current;
   main.innerHTML = `<div class="page ${switching ? "page-enter" : ""}">${views[current]()}</div>`;
+  document.querySelector("#activity-content").innerHTML = activityContent();
+  updateActivityRail();
   renderedPage = current;
   if (current === "conversation") restoreMessages();
   if (focusedNavigation)
@@ -227,8 +245,30 @@ function render() {
 }
 let sentMessages = [],
   pendingAttention = true;
+let activityCollapsed = window.matchMedia("(max-width:850px)").matches;
+function activityContent() {
+  return `<section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section>`;
+}
+function updateActivityRail() {
+  const rail = document.querySelector("#activity-rail");
+  const shown = current === "conversation";
+  rail.hidden = !shown;
+  document.querySelector(".workspace").classList.toggle("has-activity", shown);
+  document
+    .querySelector(".workspace")
+    .classList.toggle("activity-collapsed", activityCollapsed);
+  document.querySelector("#activity-content").hidden = activityCollapsed;
+  const toggle = document.querySelector("#activity-toggle");
+  toggle.setAttribute("aria-expanded", String(!activityCollapsed));
+  toggle.setAttribute(
+    "aria-label",
+    activityCollapsed ? "展开活动栏" : "收起活动栏",
+  );
+  toggle.title = activityCollapsed ? "展开活动栏" : "收起活动栏";
+  toggle.innerHTML = icon(activityCollapsed ? "expandRail" : "collapseRail");
+}
 function conversation() {
-  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，原轮廓局部短暂错位或缺段，再重新对齐。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary send-launch" type="submit"><span class="send-label">发送</span> ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
+  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，原轮廓局部短暂错位或缺段，再重新对齐。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary send-launch" type="submit"><span class="send-label">发送</span> ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section></div>`;
 }
 function tasksView() {
   const shown = tasks.filter(
@@ -348,6 +388,11 @@ function searchResults(query = "") {
     : '<p class="empty">没有匹配的页面。</p>';
 }
 const actions = {
+  "activity-toggle": () => {
+    window.signalController?.clearAll();
+    activityCollapsed = !activityCollapsed;
+    updateActivityRail();
+  },
   "file-style-toggle": (el) => {
     const card = document
       .querySelector(".artifact-strip")

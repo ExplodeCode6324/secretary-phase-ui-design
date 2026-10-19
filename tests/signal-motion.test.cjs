@@ -490,3 +490,19 @@ test("three logical frames are mutually exclusive at each frozen sample", () => 
   h.controller.clearAll();
   assert.equal(h.layer.children.length, 0);
 });
+
+test("activity rail glyphs use the same three-frame hover lifecycle", () => {
+  for (const name of ["collapseRail", "expandRail"]) {
+    const h = harness();
+    h.control.querySelector(".glyph").dataset.glyph = name;
+    h.controller.setFrameCount(3);
+    h.fire("pointerover");
+    assert.equal(
+      walk(h.layer).filter((n) => n.attrs.class === "fault-frame").length,
+      3,
+    );
+    h.fire("pointerout");
+    assert.equal(h.layer.children.length, 0);
+    assert.equal(h.timers.size, 0);
+  }
+});
