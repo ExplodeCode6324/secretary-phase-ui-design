@@ -216,7 +216,7 @@ function render() {
 let sentMessages = [],
   pendingAttention = true;
 function conversation() {
-  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，本体保持稳定，派生信号片段短暂采样与重绘。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary" type="submit">发送 ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
+  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，本体保持稳定，派生信号片段短暂采样与重绘。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary send-launch" type="submit">发送 ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
 }
 function tasksView() {
   const shown = tasks.filter(
@@ -261,7 +261,7 @@ let sampleScheme = -1;
 const motionStudies = [
   ["attention", "通知", "铃侧短轮廓与底缘先后显影；铃体、铃舌原位不动"],
   ["search", "搜索", "圆环局部与柄端采样；不放大镜片、不添加十字"],
-  ["send", "发送", "箭身短段与箭翼局部错位；箭头保持完整"],
+  ["send", "发送", "箭身短段与箭翼局部错位；对话发送键另保留基准版箭头投射"],
   ["chat", "对话", "气泡右边缘、底缘与文字短线的局部"],
   ["tasks", "任务", "夹板边缘与勾选笔画的短段"],
   ["memory", "记忆", "书脊及页面外缘的局部"],
@@ -362,7 +362,7 @@ const actions = {
   "new-task": () =>
     openDialog(
       "创建任务",
-      `<form id="task-form"><label for="task-goal" class="field-label">你希望完成什么？</label><textarea class="field" id="task-goal" rows="3" required placeholder="写下一个清楚的目标…"></textarea><p class="dialog-description">本次仅演示创建表单，不提交任务。</p><div class="dialog-actions">${button("取消", "close")}<button class="button primary" type="submit">添加示例任务</button></div></form>`,
+      `<form id="task-form"><label for="task-goal" class="field-label">你希望完成什么？</label><textarea class="field" id="task-goal" rows="3" required placeholder="写下一个清楚的目标…"></textarea><p class="dialog-description">本次仅演示创建表单，不提交任务。</p><div class="dialog-actions">${button("取消", "close")}<button class="button primary send-launch" type="submit">添加示例任务</button></div></form>`,
     ),
   "open-artifact": () =>
     openDialog(
@@ -553,6 +553,7 @@ document.addEventListener("submit", (e) => {
     });
     render();
     document.querySelector("#message-input").focus();
+    window.signalController?.feedback(document.querySelector(".send-launch"));
     document
       .querySelector("#message-form")
       .scrollIntoView({ block: "nearest" });

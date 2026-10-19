@@ -1366,20 +1366,6 @@ dialog[open] {
 }
 
 /* Interaction comes out of existing lines, rows and form boundaries. */
-nav a:after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--light-blue);
-  transform: scaleX(0);
-  transform-origin: left;
-}
-nav a.is-simulating:after {
-  animation: nav-redraw 640ms steps(6, end);
-}
 .composer-box:focus-within:after {
   content: "";
   position: absolute;
@@ -1390,24 +1376,6 @@ nav a.is-simulating:after {
   background: var(--blue);
   animation: form-resolve 600ms steps(8, end) both;
   pointer-events: none;
-}
-@keyframes nav-redraw {
-  0% {
-    transform: scaleX(0);
-    opacity: 1;
-  }
-  45% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-  65% {
-    transform: scaleX(0.7);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scaleX(1);
-    opacity: 0;
-  }
 }
 @keyframes form-resolve {
   0% {
@@ -2022,5 +1990,156 @@ textarea::placeholder {
   }
   .artifact-strip small {
     font-size: 11px;
+  }
+}
+
+/* v0.6: framed navigation; displaced border slices, never a progress bar. */
+nav a {
+  border: 1px solid var(--line);
+}
+nav a.active {
+  border-color: var(--blue);
+}
+nav a.active:before {
+  display: none;
+}
+nav a::before,
+nav a::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border: 1px solid var(--light-blue);
+  opacity: 0;
+}
+nav a.active::before {
+  inset: -1px;
+  display: block;
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+}
+nav a.is-simulating::before {
+  animation: nav-phase-a 560ms steps(2, end);
+}
+nav a.is-simulating::after {
+  border-color: var(--blue);
+  border-width: 2px;
+  animation: nav-phase-b 610ms steps(3, end);
+}
+nav a[data-signal-scheme="2"] {
+  --nav-x: -5px;
+  --nav-y: 3px;
+}
+nav a[data-signal-scheme="3"] {
+  --nav-x: 4px;
+  --nav-y: -3px;
+}
+nav a[data-signal-scheme="4"] {
+  --nav-x: -3px;
+  --nav-y: -4px;
+}
+nav a[data-signal-scheme="2"]::before,
+nav a[data-signal-scheme="4"]::before {
+  border-width: 2px;
+}
+nav a[data-signal-scheme="2"]::after,
+nav a[data-signal-scheme="4"]::after {
+  border-width: 1px;
+}
+@keyframes nav-phase-a {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 65% 35% 0);
+  }
+  18%,
+  43% {
+    opacity: 0.9;
+    transform: translate(var(--nav-x, 5px), var(--nav-y, -2px));
+    clip-path: inset(0 42% 60% 0);
+  }
+  67% {
+    opacity: 0.55;
+    transform: translate(0, 0);
+    clip-path: inset(0 65% 35% 0);
+  }
+}
+@keyframes nav-phase-b {
+  0%,
+  22%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(62% 0 0 48%);
+  }
+  35%,
+  62% {
+    opacity: 0.9;
+    transform: translate(
+      calc(-1 * var(--nav-x, 5px)),
+      calc(-1 * var(--nav-y, -2px))
+    );
+    clip-path: inset(62% 0 0 48%);
+  }
+  82% {
+    opacity: 0.5;
+    transform: translate(0, 0);
+    clip-path: inset(35% 0 0 80%);
+  }
+}
+/* Explicit Master-approved exception: the baseline arrow on the actual send key. */
+.send-launch .part {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+.send-launch.is-simulating .part:nth-child(1) {
+  animation: send-shaft 850ms both;
+}
+.send-launch.is-simulating .part:nth-child(2) {
+  animation: send-head 850ms both;
+}
+@keyframes send-shaft {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  30% {
+    transform: scaleX(1.4);
+    stroke: var(--blue);
+  }
+  55% {
+    transform: scaleX(0.4);
+    opacity: 0.2;
+  }
+  75% {
+    transform: scaleX(0.8);
+  }
+}
+@keyframes send-head {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  35% {
+    transform: translateX(11px);
+    stroke: var(--blue);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+  51% {
+    transform: translateX(-8px);
+    opacity: 0;
+  }
+  75% {
+    transform: translateX(2px);
+    opacity: 1;
   }
 }
