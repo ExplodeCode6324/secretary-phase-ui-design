@@ -221,6 +221,24 @@
         : undefined,
     };
   }
+  function thirdFrame(sample, bounds) {
+    return {
+      ...sample,
+      band: sample.thirdBand || {
+        ...sample.band,
+        y: Math.max(0, sample.band.y - sample.band.height - 2),
+        height: Math.max(2, sample.band.height * 0.7),
+      },
+      dx: sample.dx * 0.5,
+      dy: 0,
+      dropout: sample.dropout
+        ? {
+            ...sample.dropout,
+            start: (sample.dropout.start + 57) % (100 - sample.dropout.length),
+          }
+        : undefined,
+    };
+  }
   function mountFault(
     document,
     layer,
@@ -232,6 +250,8 @@
     strokeWidth = 1.5,
   ) {
     const samples = [sample, secondFrame(sample, bounds)];
+    if (sample.frameCount !== 2) samples.push(thirdFrame(sample, bounds));
+    const step = 0.8 / samples.length;
     samples.forEach((frame, index) => {
       const group = el(document, "g", {
         "data-phase-frame": index + 1,
@@ -255,18 +275,12 @@
       );
       animate(
         group,
-        index === 0
-          ? [
-              { opacity: 1, offset: 0 },
-              { opacity: 0, offset: 0.4 },
-              { opacity: 0, offset: 1 },
-            ]
-          : [
-              { opacity: 0, offset: 0 },
-              { opacity: 1, offset: 0.4 },
-              { opacity: 0, offset: 0.8 },
-              { opacity: 0, offset: 1 },
-            ],
+        [
+          { opacity: index === 0 ? 1 : 0, offset: 0 },
+          ...(index ? [{ opacity: 1, offset: index * step }] : []),
+          { opacity: 0, offset: (index + 1) * step },
+          { opacity: 0, offset: 1 },
+        ],
         sample.duration,
       );
     });
@@ -306,7 +320,8 @@
       fixedScheme = -1,
       monochrome = false,
       freeze = false,
-      freezeFrame = 0;
+      freezeFrame = 0,
+      frameCount = 3;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     function enabled(c) {
       return (
@@ -359,7 +374,7 @@
         effect.animations.push(a);
         if (held) {
           a.pause();
-          a.currentTime = span * (freezeFrame === 0 ? 0.2 : 0.6);
+          a.currentTime = span * (((freezeFrame + 0.5) * 0.8) / frameCount);
         }
       };
       if (!held)
@@ -395,6 +410,7 @@
           : [`M${w - 0.5} 0V${h}`]
         : [`M.5 .5H${w - 0.5}V${h - 0.5}H.5Z`];
       const sample = {
+        frameCount,
         kind: 0,
         duration,
         band: navigation
@@ -442,6 +458,7 @@
         svg,
         [`M.5 .5H${w - 0.5}V${h - 0.5}H.5Z`],
         {
+          frameCount,
           kind: 0,
           duration: 160,
           band: { x: -4, y: h * 0.28, width: w + 8, height: 5 },
@@ -542,6 +559,7 @@
         glyph.getBoundingClientRect().width,
         fixedScheme,
       );
+      sample.frameCount = frameCount;
       const held = freeze && c.classList.contains("study-trigger");
       const effect = begin(c, sample.duration, held);
       if (!effect) return;
@@ -665,6 +683,11 @@
           if (send) sendEffect(send);
         }
       },
+      setFrameCount(value) {
+        clearAll();
+        frameCount = value === 2 ? 2 : 3;
+        freezeFrame = 0;
+      },
       setFreezeFrame(value) {
         clearAll();
         freezeFrame = value;
@@ -691,7 +714,7 @@
       },
     };
   }
-  const api = { plan, secondFrame, mountFault, createController };
+  const api = { plan, secondFrame, thirdFrame, mountFault, createController };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.PhaseSignalMotion = api;
 })(typeof window !== "undefined" ? window : globalThis);

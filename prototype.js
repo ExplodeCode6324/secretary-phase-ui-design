@@ -272,7 +272,8 @@ function settingsView() {
 let sampleScheme = -1,
   sampleMono = false,
   sampleFreeze = false,
-  sampleFreezeFrame = 0;
+  sampleFreezeFrame = 0,
+  sampleFrameCount = 3;
 const motionStudies = [
   ["attention", "通知", "横带穿过铃廓，移走处留空；缺采样切断铃侧笔画。"],
   ["search", "搜索", "圆环中段与柄端可短暂缺段，圆形源几何不变。"],
@@ -296,10 +297,10 @@ function motionView() {
   return `${heading("显示故障", "", "源几何不变；屏幕上的局部可以移走、缺失，再重新对齐。")}
 <div class="motion-intro"><p>左侧是完整源图，右侧替换实际显示：移走的横带在原位置留空。A / B 使用同色验证；C 增加少量双色残像。</p>
 <div class="sample-options" role="group" aria-label="故障方案">${sampleLabels.map((label, i) => `<button class="text-button" data-sample-scheme="${i - 1}" aria-pressed="${i - 1 === sampleScheme}">${label}</button>`).join("")}</div>
-<div class="sample-options"><button class="text-button" data-sample-mono aria-pressed="${sampleMono}">仅同色：${sampleMono ? "开" : "关"}</button><button class="text-button" data-sample-freeze aria-pressed="${sampleFreeze}">冻结故障帧：${sampleFreeze ? "开" : "关"}</button><button class="text-button" data-freeze-frame>冻结帧：${sampleFreezeFrame === 0 ? "第一帧" : "第二帧"}</button></div>
-<p id="sample-status" role="status">${sampleLabels[sampleScheme + 1]} · 正常播放 140–200 ms · 两个不同故障帧；固定方案参数不随机。</p><p class="quiet-note">冻结仅用于右侧样本检查，移出、失焦或关闭动效即恢复；不影响产品控件的正常时长。关闭冻结后重新触发可观察实际播放。</p></div>
+<div class="sample-options"><button class="text-button" data-sample-mono aria-pressed="${sampleMono}">仅同色：${sampleMono ? "开" : "关"}</button><button class="text-button" data-sample-freeze aria-pressed="${sampleFreeze}">冻结故障帧：${sampleFreeze ? "开" : "关"}</button><button class="text-button" data-frame-count>逻辑帧数：${sampleFrameCount}</button><button class="text-button" data-freeze-frame>冻结帧：${["第一帧", "第二帧", "第三帧"][sampleFreezeFrame]}</button></div>
+<p id="sample-status" role="status">${sampleLabels[sampleScheme + 1]} · 正常播放 140–200 ms · ${sampleFrameCount} 个不同故障帧；固定方案参数不随机。</p><p class="quiet-note">冻结仅用于右侧样本检查，移出、失焦或关闭动效即恢复；不影响产品控件的正常时长。关闭冻结后重新触发可观察实际播放。</p></div>
 <div class="comparison-grid">${motionStudies.map(([name, label, description]) => `<section class="comparison-cell"><div class="comparison-title"><h2>${label}</h2></div><div class="comparison-pair"><button class="study-trigger static-sample" data-action="icon-demo" aria-label="${label}静态完整">${icon(name)}<span>静态完整</span></button><button class="study-trigger" data-action="icon-demo" aria-label="${label}故障播放">${icon(name)}<span>故障播放</span></button></div><p>${description}</p></section>`).join("")}</div>
-<h2 class="section-title">发送按钮</h2><p>按钮方块先后错开两条不同横带；箭身收放、箭头投射与拖尾沿用 v0.3 动作，播放加快至 420ms。文字与点击范围保持原位。</p><button class="button primary send-launch study-trigger" data-action="icon-demo" aria-label="发送按钮动效样本"><span class="send-label">发送</span>${icon("send")}</button><h2 class="section-title">实际尺寸与操作</h2><div class="icon-study">${["attention", "search", "tasks"].map((name) => `<button data-action="icon-demo" aria-label="${name}小尺寸故障"><span class="small-icon">${icon(name)}</span>16 px</button>`).join("")}</div>
+<h2 class="section-title">发送按钮</h2><p>按钮方块依次在不同横带错位；箭身收放、箭头投射与拖尾沿用 v0.3 动作，播放加快至 420ms。文字与点击范围保持原位。</p><button class="button primary send-launch study-trigger" data-action="icon-demo" aria-label="发送按钮动效样本"><span class="send-label">发送</span>${icon("send")}</button><h2 class="section-title">实际尺寸与操作</h2><div class="icon-study">${["attention", "search", "tasks"].map((name) => `<button data-action="icon-demo" aria-label="${name}小尺寸故障"><span class="small-icon">${icon(name)}</span>16 px</button>`).join("")}</div>
 <div class="motion-grid"><section class="motion-cell"><h3>按下与释放</h3>${button(icon("send") + " 按住试试", "press-demo")}<p>点击范围不移动；按下立即显影，释放延续同次反馈。</p></section><section class="motion-cell"><h3>处理中 → 完成</h3>${button("运行示例", "run-success")}<p>状态独立于装饰效果。</p></section><section class="motion-cell"><h3>处理中 → 失败</h3>${button("失败示例", "run-error")}<p>失败使用红色和明确文字。</p></section><section class="motion-cell"><h3>面板展开</h3>${button("展开面板", "panel-demo")}<p>内容显影与状态独立。</p></section><section class="motion-cell"><h3>键盘焦点</h3>${button("Tab 到这里", "focus-demo")}<p>同次悬停与聚焦合并，焦点框保留。</p></section><section class="motion-cell"><h3>不可用</h3><button class="button" disabled>${icon("send")} 不可用</button><p>禁用不产生故障。</p></section></div><a class="text-button" href="#settings">调整动效强度 →</a>`;
 }
 
@@ -514,10 +515,20 @@ document.addEventListener("click", (e) => {
         );
     } else actions[action]?.(target);
   }
+  if (target.hasAttribute("data-frame-count")) {
+    sampleFrameCount = sampleFrameCount === 3 ? 2 : 3;
+    sampleFreezeFrame = 0;
+    signalController.setFrameCount(sampleFrameCount);
+    target.textContent = `逻辑帧数：${sampleFrameCount}`;
+    document.querySelector("[data-freeze-frame]").textContent =
+      "冻结帧：第一帧";
+    document.querySelector("#sample-status").textContent =
+      `${sampleFrameCount} 帧 · 总时长不变，重新触发样本观察`;
+  }
   if (target.hasAttribute("data-freeze-frame")) {
-    sampleFreezeFrame = 1 - sampleFreezeFrame;
+    sampleFreezeFrame = (sampleFreezeFrame + 1) % sampleFrameCount;
     signalController.setFreezeFrame(sampleFreezeFrame);
-    target.textContent = `冻结帧：${sampleFreezeFrame === 0 ? "第一帧" : "第二帧"}`;
+    target.textContent = `冻结帧：${["第一帧", "第二帧", "第三帧"][sampleFreezeFrame]}`;
   }
   if (target.hasAttribute("data-sample-mono")) {
     sampleMono = !sampleMono;

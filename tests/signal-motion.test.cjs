@@ -156,6 +156,7 @@ function harness() {
   const fire = (type, extra = {}) =>
     document.dispatch(type, { target: control, relatedTarget: null, ...extra });
   const controller = createController({ document, window, geometry });
+  controller.setFrameCount(2);
   return {
     control,
     original,
@@ -441,8 +442,8 @@ test("freeze selector targets two distinct logical frames without replaying old 
   h.controller.setFreezeFrame(1);
   h.fire("click");
   const frames = walk(h.layer).filter((n) => n.attrs.class === "fault-frame");
-  assert.equal(frames[0].animations[0].currentTime, 96);
-  assert.equal(frames[1].animations[0].currentTime, 96);
+  assert.ok(Math.abs(frames[0].animations[0].currentTime - 96) < 1e-8);
+  assert.ok(Math.abs(frames[1].animations[0].currentTime - 96) < 1e-8);
   h.controller.setFreezeFrame(0);
   assert.equal(h.layer.children.length, 0);
 });
@@ -463,4 +464,29 @@ test("discrete frames step per segment while the effect timeline remains linear"
     return a.frames.filter((frame) => frame.offset <= progress).at(-1).opacity;
   });
   assert.deepEqual(visible, [0, 1]);
+});
+
+test("three logical frames are mutually exclusive at each frozen sample", () => {
+  const h = harness();
+  h.control.classes.add("study-trigger");
+  h.controller.setFrameCount(3);
+  h.controller.setFreeze(true);
+  for (let i = 0; i < 3; i++) {
+    h.controller.setFreezeFrame(i);
+    h.fire("click");
+    const groups = walk(h.layer).filter((n) => n.attrs.class === "fault-frame");
+    assert.equal(groups.length, 3);
+    assert.deepEqual(
+      groups.map((group) => {
+        const a = group.animations[0];
+        assert.equal(a.options.easing, "linear");
+        return a.frames
+          .filter((f) => f.offset <= a.currentTime / a.options.duration)
+          .at(-1).opacity;
+      }),
+      [0, 1, 2].map((n) => (n === i ? 1 : 0)),
+    );
+  }
+  h.controller.clearAll();
+  assert.equal(h.layer.children.length, 0);
 });
