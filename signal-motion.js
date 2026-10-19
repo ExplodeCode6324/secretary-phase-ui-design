@@ -27,7 +27,7 @@
     };
     return {
       kind,
-      duration: small ? 200 : [240, 280, 320, 0][kind],
+      duration: small ? 140 : [160, 180, 200, 0][kind],
       band: {
         x: -4,
         y:
@@ -52,7 +52,7 @@
     return node;
   }
   // The only full source image is hidden by the caller. All visible copies are clipped/masked.
-  function mountFault(
+  function mountFaultFrame(
     document,
     layer,
     paths,
@@ -97,7 +97,7 @@
         parent.append(
           el(document, "path", {
             d,
-            fill: "none",
+            fill: sample.fill || "none",
             stroke: "currentColor",
             "stroke-width": strokeWidth,
             "stroke-linejoin": "round",
@@ -201,6 +201,100 @@
       }
     }
   }
+  function secondFrame(sample, bounds) {
+    return {
+      ...sample,
+      band: sample.secondBand || {
+        ...sample.band,
+        y: Math.min(
+          bounds.height - sample.band.height - 1,
+          sample.band.y + sample.band.height + 2,
+        ),
+      },
+      dx: -sample.dx * 0.75,
+      dy: -(sample.dy || 0),
+      dropout: sample.dropout
+        ? {
+            ...sample.dropout,
+            start: (sample.dropout.start + 29) % (100 - sample.dropout.length),
+          }
+        : undefined,
+    };
+  }
+  function mountFault(
+    document,
+    layer,
+    paths,
+    sample,
+    bounds,
+    animate,
+    residue = false,
+    strokeWidth = 1.5,
+  ) {
+    const samples = [sample, secondFrame(sample, bounds)];
+    samples.forEach((frame, index) => {
+      const group = el(document, "g", {
+        "data-phase-frame": index + 1,
+        class: "fault-frame",
+      });
+      group.style.opacity = index === 0 ? "1" : "0";
+      layer.append(group);
+      // Each logical frame is a different static reconstruction, not an eased return of frame one.
+      mountFaultFrame(
+        document,
+        group,
+        paths,
+        frame,
+        bounds,
+        (node, frames) => {
+          for (const [key, value] of Object.entries(frames[0]))
+            if (key !== "offset") node.style[key] = String(value);
+        },
+        residue,
+        strokeWidth,
+      );
+      animate(
+        group,
+        index === 0
+          ? [
+              { opacity: 1, offset: 0 },
+              { opacity: 0, offset: 0.4 },
+              { opacity: 0, offset: 1 },
+            ]
+          : [
+              { opacity: 0, offset: 0 },
+              { opacity: 1, offset: 0.4 },
+              { opacity: 0, offset: 0.8 },
+              { opacity: 0, offset: 1 },
+            ],
+        sample.duration,
+      );
+    });
+    const resolved = el(document, "g", { class: "resolved-display" });
+    resolved.style.opacity = "0";
+    paths.forEach((d) =>
+      resolved.append(
+        el(document, "path", {
+          d,
+          fill: sample.fill || "none",
+          stroke: "currentColor",
+          "stroke-width": strokeWidth,
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+        }),
+      ),
+    );
+    layer.append(resolved);
+    animate(
+      resolved,
+      [
+        { opacity: 0, offset: 0 },
+        { opacity: 1, offset: 0.8 },
+        { opacity: 1, offset: 1 },
+      ],
+      sample.duration,
+    );
+  }
   function createController({
     document,
     window,
@@ -211,7 +305,8 @@
     let contacts = new WeakMap(),
       fixedScheme = -1,
       monochrome = false,
-      freeze = false;
+      freeze = false,
+      freezeFrame = 0;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     function enabled(c) {
       return (
@@ -236,6 +331,7 @@
         "commit-pulse",
         "boundary-fault",
         "submit-fault",
+        "surface-fault",
       );
       c.removeAttribute("data-fault-kind");
     }
@@ -249,17 +345,17 @@
       const effect = { animations: [], cleanup: [] };
       active.set(c, effect);
       c.classList.add("is-simulating");
-      effect.animate = (node, frames, span) => {
+      effect.animate = (node, frames, span, easing = "steps(1,end)") => {
         const a = node.animate(frames, {
           duration: span,
-          easing: "steps(1,end)",
+          easing,
           fill: "both",
         });
         a.finished.catch(() => {});
         effect.animations.push(a);
         if (held) {
           a.pause();
-          a.currentTime = span * 0.25;
+          a.currentTime = span * (freezeFrame === 0 ? 0.2 : 0.6);
         }
       };
       if (!held)
@@ -269,7 +365,7 @@
       return effect;
     }
     function boundary(c, navigation = false) {
-      const duration = navigation ? 220 : 200;
+      const duration = 140;
       const effect = begin(c, duration);
       if (!effect) return;
       const rect = c.getBoundingClientRect(),
@@ -302,6 +398,10 @@
             ? { x: w * 0.2, y: -2, width: Math.min(38, w * 0.3), height: 5 }
             : { x: w - 3, y: h * 0.35, width: 6, height: 8 }
           : { x: w - 3, y: h * 0.3, width: 6, height: 16 },
+        secondBand:
+          navigation && selected
+            ? { x: w * 0.55, y: -2, width: Math.min(30, w * 0.25), height: 5 }
+            : { x: w - 3, y: h * 0.6, width: 6, height: navigation ? 8 : 16 },
         dx: navigation ? 2 : -1.5,
         dy: navigation ? 1 : 0,
       };
@@ -316,11 +416,111 @@
         1,
       );
     }
+    function sendEffect(c) {
+      const effect = begin(
+        c,
+        420,
+        freeze && c.classList.contains("study-trigger"),
+      );
+      if (!effect) return;
+      const { width: w, height: h } = c.getBoundingClientRect();
+      const svg = el(document, "svg", {
+        viewBox: `0 0 ${w} ${h}`,
+        class: "send-surface",
+        "aria-hidden": "true",
+        focusable: "false",
+      });
+      c.classList.add("surface-fault");
+      c.append(svg);
+      effect.cleanup.push(() => svg.remove());
+      mountFault(
+        document,
+        svg,
+        [`M.5 .5H${w - 0.5}V${h - 0.5}H.5Z`],
+        {
+          kind: 0,
+          duration: 160,
+          band: { x: -4, y: h * 0.28, width: w + 8, height: 5 },
+          secondBand: { x: -4, y: h * 0.62, width: w + 8, height: 4 },
+          dx: 2,
+          fill: "currentColor",
+        },
+        { width: w, height: h },
+        effect.animate,
+        false,
+        1,
+      );
+      const glyph = c.querySelector(".glyph");
+      const body = glyph?.querySelector(".icon-body");
+      if (body && body.children.length >= 2) {
+        effect.animate(
+          body.children[0],
+          [
+            { transform: "scaleX(1)", opacity: 1, offset: 0 },
+            { transform: "scaleX(1.4)", stroke: "var(--blue)", offset: 0.3 },
+            { transform: "scaleX(.4)", opacity: 0.2, offset: 0.55 },
+            { transform: "scaleX(.8)", offset: 0.75 },
+            { transform: "scaleX(1)", opacity: 1, offset: 1 },
+          ],
+          420,
+          "ease",
+        );
+        effect.animate(
+          body.children[1],
+          [
+            { transform: "translateX(0)", opacity: 1, offset: 0 },
+            {
+              transform: "translateX(11px)",
+              stroke: "var(--blue)",
+              opacity: 1,
+              offset: 0.35,
+            },
+            { transform: "translateX(16px)", opacity: 0, offset: 0.5 },
+            { transform: "translateX(-8px)", opacity: 0, offset: 0.51 },
+            { transform: "translateX(2px)", opacity: 1, offset: 0.75 },
+            { transform: "translateX(0)", opacity: 1, offset: 1 },
+          ],
+          420,
+          "ease",
+        );
+        const layer = glyph.querySelector(".signal-layer");
+        const trail = el(document, "path", {
+          d: "M2 8h6 M2 16h6",
+          class: "send-trail",
+          stroke: "var(--light-blue)",
+          "stroke-width": 1,
+          fill: "none",
+        });
+        layer.append(trail);
+        effect.cleanup.push(() => layer.replaceChildren());
+        effect.animate(
+          trail,
+          [
+            { opacity: 0, transform: "translateX(0)", offset: 0 },
+            { opacity: 0.7, transform: "translateX(5px)", offset: 0.3 },
+            { opacity: 0, transform: "translateX(12px)", offset: 0.6 },
+            { opacity: 0, transform: "translateX(0)", offset: 1 },
+          ],
+          420,
+          "ease",
+        );
+      }
+      onSample({
+        kind: "send",
+        duration: 160,
+        monochrome: false,
+        held: freeze && c.classList.contains("study-trigger"),
+        frame: freezeFrame + 1,
+      });
+    }
     function play(c, activation = false) {
       clear(c);
       if (!enabled(c) || fixedScheme === 3) return;
-      // Submission alone animates its boundary. The old projecting arrow remains in v0.6.
-      if (c.classList.contains("send-launch")) return;
+      // The approved v0.3 arrow is an explicit exception, owned by this same cancellable effect.
+      if (c.classList.contains("send-launch")) {
+        sendEffect(c);
+        return;
+      }
       if (
         c.closest("nav") &&
         activation &&
@@ -363,6 +563,7 @@
         duration: sample.duration,
         monochrome: monochrome || sample.kind !== 2,
         held,
+        frame: freezeFrame + 1,
       });
     }
     const target = (e) => e.target.closest?.("button,a");
@@ -404,6 +605,8 @@
       if (!c) return;
       clear(c);
       if (c.closest("nav")) boundary(c, true);
+      else play(c, true);
+      contact(c).pressed = true;
     }
     listen(document, "pointerdown", press);
     listen(document, "keydown", (e) => {
@@ -414,7 +617,12 @@
       "click",
       (e) => {
         const c = target(e);
-        if (c) play(c, true);
+        if (c) {
+          const state = contact(c);
+          const continuingPress = state.pressed && active.has(c);
+          state.pressed = false;
+          if (!continuingPress) play(c, true);
+        }
       },
       true,
     );
@@ -447,7 +655,15 @@
         if (c) play(c, true);
       },
       submit(c) {
-        if (c) boundary(c);
+        if (c) {
+          boundary(c);
+          const send = c.querySelector(".send-launch");
+          if (send) sendEffect(send);
+        }
+      },
+      setFreezeFrame(value) {
+        clearAll();
+        freezeFrame = value;
       },
       navigation(c) {
         if (c) boundary(c, true);
@@ -471,7 +687,7 @@
       },
     };
   }
-  const api = { plan, mountFault, createController };
+  const api = { plan, secondFrame, mountFault, createController };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.PhaseSignalMotion = api;
 })(typeof window !== "undefined" ? window : globalThis);

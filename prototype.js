@@ -228,7 +228,7 @@ function render() {
 let sentMessages = [],
   pendingAttention = true;
 function conversation() {
-  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，原轮廓局部短暂错位或缺段，再重新对齐。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary send-launch" type="submit">发送 ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
+  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，原轮廓局部短暂错位或缺段，再重新对齐。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary send-launch" type="submit"><span class="send-label">发送</span> ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
 }
 function tasksView() {
   const shown = tasks.filter(
@@ -271,12 +271,13 @@ function settingsView() {
 }
 let sampleScheme = -1,
   sampleMono = false,
-  sampleFreeze = false;
+  sampleFreeze = false,
+  sampleFreezeFrame = 0;
 const motionStudies = [
   ["attention", "通知", "横带穿过铃廓，移走处留空；缺采样切断铃侧笔画。"],
   ["search", "搜索", "圆环中段与柄端可短暂缺段，圆形源几何不变。"],
   ["tasks", "任务", "夹板两侧在同一横带内错开，勾选仍属于原图。"],
-  ["send", "发送", "显示层分带；历史投射动作仅在 v0.6 对照页保留。"],
+  ["send", "发送", "通用图标分带；下方独立样本可观察发送按钮与原版箭头。"],
   ["chat", "对话", "横带经过气泡边缘与文字短线。"],
   ["memory", "记忆", "页缘和书脊短暂不连续，不抽页。"],
   ["file", "产物", "纸页边缘缺段，折角不展开。"],
@@ -295,11 +296,11 @@ function motionView() {
   return `${heading("显示故障", "", "源几何不变；屏幕上的局部可以移走、缺失，再重新对齐。")}
 <div class="motion-intro"><p>左侧是完整源图，右侧替换实际显示：移走的横带在原位置留空。A / B 使用同色验证；C 增加少量双色残像。</p>
 <div class="sample-options" role="group" aria-label="故障方案">${sampleLabels.map((label, i) => `<button class="text-button" data-sample-scheme="${i - 1}" aria-pressed="${i - 1 === sampleScheme}">${label}</button>`).join("")}</div>
-<div class="sample-options"><button class="text-button" data-sample-mono aria-pressed="${sampleMono}">仅同色：${sampleMono ? "开" : "关"}</button><button class="text-button" data-sample-freeze aria-pressed="${sampleFreeze}">冻结故障帧：${sampleFreeze ? "开" : "关"}</button></div>
-<p id="sample-status" role="status">${sampleLabels[sampleScheme + 1]} · 正常播放 200–320 ms；固定方案参数不随机。</p><p class="quiet-note">冻结仅用于右侧样本检查，移出、失焦或关闭动效即恢复；不影响产品控件的正常时长。关闭冻结后重新触发可观察实际播放。</p></div>
+<div class="sample-options"><button class="text-button" data-sample-mono aria-pressed="${sampleMono}">仅同色：${sampleMono ? "开" : "关"}</button><button class="text-button" data-sample-freeze aria-pressed="${sampleFreeze}">冻结故障帧：${sampleFreeze ? "开" : "关"}</button><button class="text-button" data-freeze-frame>冻结帧：${sampleFreezeFrame === 0 ? "第一帧" : "第二帧"}</button></div>
+<p id="sample-status" role="status">${sampleLabels[sampleScheme + 1]} · 正常播放 140–200 ms · 两个不同故障帧；固定方案参数不随机。</p><p class="quiet-note">冻结仅用于右侧样本检查，移出、失焦或关闭动效即恢复；不影响产品控件的正常时长。关闭冻结后重新触发可观察实际播放。</p></div>
 <div class="comparison-grid">${motionStudies.map(([name, label, description]) => `<section class="comparison-cell"><div class="comparison-title"><h2>${label}</h2></div><div class="comparison-pair"><button class="study-trigger static-sample" data-action="icon-demo" aria-label="${label}静态完整">${icon(name)}<span>静态完整</span></button><button class="study-trigger" data-action="icon-demo" aria-label="${label}故障播放">${icon(name)}<span>故障播放</span></button></div><p>${description}</p></section>`).join("")}</div>
-<h2 class="section-title">实际尺寸与操作</h2><div class="icon-study">${["attention", "search", "tasks"].map((name) => `<button data-action="icon-demo" aria-label="${name}小尺寸故障"><span class="small-icon">${icon(name)}</span>16 px</button>`).join("")}</div>
-<div class="motion-grid"><section class="motion-cell"><h3>按下与释放</h3>${button(icon("send") + " 按住试试", "press-demo")}<p>点击范围不移动；按下清理，激活即时响应。</p></section><section class="motion-cell"><h3>处理中 → 完成</h3>${button("运行示例", "run-success")}<p>状态独立于装饰效果。</p></section><section class="motion-cell"><h3>处理中 → 失败</h3>${button("失败示例", "run-error")}<p>失败使用红色和明确文字。</p></section><section class="motion-cell"><h3>面板展开</h3>${button("展开面板", "panel-demo")}<p>内容显影与状态独立。</p></section><section class="motion-cell"><h3>键盘焦点</h3>${button("Tab 到这里", "focus-demo")}<p>同次悬停与聚焦合并，焦点框保留。</p></section><section class="motion-cell"><h3>不可用</h3><button class="button" disabled>${icon("send")} 不可用</button><p>禁用不产生故障。</p></section></div><a class="text-button" href="versions/v0.6/index.html#conversation" target="_blank" rel="noopener">对照 v0.6 发送箭头 ↗</a> · <a class="text-button" href="#settings">调整动效强度 →</a>`;
+<h2 class="section-title">发送按钮</h2><p>按钮方块先后错开两条不同横带；箭身收放、箭头投射与拖尾沿用 v0.3 动作，播放加快至 420ms。文字与点击范围保持原位。</p><button class="button primary send-launch study-trigger" data-action="icon-demo" aria-label="发送按钮动效样本"><span class="send-label">发送</span>${icon("send")}</button><h2 class="section-title">实际尺寸与操作</h2><div class="icon-study">${["attention", "search", "tasks"].map((name) => `<button data-action="icon-demo" aria-label="${name}小尺寸故障"><span class="small-icon">${icon(name)}</span>16 px</button>`).join("")}</div>
+<div class="motion-grid"><section class="motion-cell"><h3>按下与释放</h3>${button(icon("send") + " 按住试试", "press-demo")}<p>点击范围不移动；按下立即显影，释放延续同次反馈。</p></section><section class="motion-cell"><h3>处理中 → 完成</h3>${button("运行示例", "run-success")}<p>状态独立于装饰效果。</p></section><section class="motion-cell"><h3>处理中 → 失败</h3>${button("失败示例", "run-error")}<p>失败使用红色和明确文字。</p></section><section class="motion-cell"><h3>面板展开</h3>${button("展开面板", "panel-demo")}<p>内容显影与状态独立。</p></section><section class="motion-cell"><h3>键盘焦点</h3>${button("Tab 到这里", "focus-demo")}<p>同次悬停与聚焦合并，焦点框保留。</p></section><section class="motion-cell"><h3>不可用</h3><button class="button" disabled>${icon("send")} 不可用</button><p>禁用不产生故障。</p></section></div><a class="text-button" href="#settings">调整动效强度 →</a>`;
 }
 
 const views = {
@@ -386,7 +387,7 @@ const actions = {
   "new-task": () =>
     openDialog(
       "创建任务",
-      `<form id="task-form"><label for="task-goal" class="field-label">你希望完成什么？</label><textarea class="field" id="task-goal" rows="3" required placeholder="写下一个清楚的目标…"></textarea><p class="dialog-description">本次仅演示创建表单，不提交任务。</p><div class="dialog-actions">${button("取消", "close")}<button class="button primary send-launch" type="submit">添加示例任务</button></div></form>`,
+      `<form id="task-form"><label for="task-goal" class="field-label">你希望完成什么？</label><textarea class="field" id="task-goal" rows="3" required placeholder="写下一个清楚的目标…"></textarea><p class="dialog-description">本次仅演示创建表单，不提交任务。</p><div class="dialog-actions">${button("取消", "close")}<button class="button primary" type="submit">添加示例任务</button></div></form>`,
     ),
   "open-artifact": () =>
     openDialog(
@@ -512,6 +513,11 @@ document.addEventListener("click", (e) => {
           `<div class="record-meta">TASK / ${t.id}</div><p>${escapeHTML(t.desc)}</p>${state(t.state)}<h3 class="section-title">目标与结果</h3><p>保持信息结构清楚，让每一个操作有可见、稳定的反馈。</p><p class="dialog-description">任务详情样式示例。</p>`,
         );
     } else actions[action]?.(target);
+  }
+  if (target.hasAttribute("data-freeze-frame")) {
+    sampleFreezeFrame = 1 - sampleFreezeFrame;
+    signalController.setFreezeFrame(sampleFreezeFrame);
+    target.textContent = `冻结帧：${sampleFreezeFrame === 0 ? "第一帧" : "第二帧"}`;
   }
   if (target.hasAttribute("data-sample-mono")) {
     sampleMono = !sampleMono;
@@ -646,10 +652,10 @@ window.signalController = PhaseSignalMotion.createController({
   document,
   window,
   geometry,
-  onSample: ({ kind, duration, monochrome, held }) => {
+  onSample: ({ kind, duration, monochrome, held, frame }) => {
     const status = document.querySelector("#sample-status");
     if (status)
-      status.textContent = `${["A 分带错位", "B 缺采样", "C 组合"][kind]} · ${monochrome ? "仅同色" : "双色辅助"} · ${duration} ms · ${held ? "冻结在故障帧" : "实际播放后恢复完整"}`;
+      status.textContent = `${kind === "send" ? "发送方块与原版箭头" : ["A 分带错位", "B 缺采样", "C 组合"][kind]} · ${monochrome ? "仅同色" : "双色辅助"} · ${duration} ms${kind === "send" ? " 方块 / 420 ms 箭头" : ""} · ${held ? `冻结在第 ${frame} 帧` : "实际播放后恢复完整"}`;
   },
 });
 

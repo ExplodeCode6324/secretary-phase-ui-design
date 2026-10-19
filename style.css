@@ -1374,7 +1374,7 @@ dialog[open] {
   height: 1px;
   width: 100%;
   background: var(--blue);
-  animation: form-resolve 600ms steps(8, end) both;
+  animation: form-resolve 220ms steps(8, end) both;
   pointer-events: none;
 }
 @keyframes form-resolve {
@@ -1447,10 +1447,10 @@ dialog[open] {
   --soft: #e4e1da;
   --body-copy: #4c5156;
   --pressed: #dce3ec;
-  --motion-page: 420ms;
-  --motion-drawer: 320ms;
-  --motion-input: 480ms;
-  --motion-button: 320ms;
+  --motion-page: 260ms;
+  --motion-drawer: 220ms;
+  --motion-input: 200ms;
+  --motion-button: 180ms;
   color-scheme: light;
 }
 .page {
@@ -2117,4 +2117,62 @@ nav a.boundary-fault:not(.active)::after {
   width: 2px;
   background: var(--sidebar-paper);
   pointer-events: none;
+}
+
+/* v0.8: the send surface itself is reconstructed; label and hit target stay put. */
+.send-launch {
+  --send-fill: var(--ink);
+  isolation: isolate;
+  transition: none;
+}
+html[data-theme="dark"] .send-launch {
+  --send-fill: #cfdae5;
+}
+.send-launch::before,
+.send-launch::after {
+  display: none;
+}
+.send-launch.surface-fault {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+.send-launch .send-label,
+.send-launch > .glyph {
+  position: relative;
+  z-index: 2;
+}
+.button .send-surface {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  color: var(--send-fill);
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+.send-launch .part {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+.send-launch.study-trigger {
+  display: inline-flex;
+  flex-direction: row;
+  min-height: 36px;
+  padding: 7px 16px;
+  gap: 9px;
+}
+.send-launch.study-trigger > .glyph,
+.send-launch.study-trigger .glyph svg {
+  width: 17px;
+  height: 17px;
+  color: inherit;
+}
+.send-launch .send-label,
+.send-launch > .glyph {
+  color: inherit;
+}
+.send-launch .send-label {
+  font: inherit;
 }

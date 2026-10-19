@@ -2,7 +2,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
-const { plan, createController } = require("../signal-motion.js");
+const { plan, secondFrame, createController } = require("../signal-motion.js");
 const source = fs.readFileSync(
   require("node:path").join(__dirname, "../prototype.js"),
   "utf8",
@@ -26,6 +26,8 @@ function host() {
 class Node {
   constructor(tag) {
     this.tag = tag;
+    this.style = {};
+    this.animations = [];
     this.attrs = {};
     this.children = [];
     this.classes = new Set();
@@ -87,7 +89,7 @@ class Node {
     );
   }
   animate(frames, options) {
-    return {
+    const animation = {
       frames,
       options,
       finished: Promise.resolve(),
@@ -100,6 +102,8 @@ class Node {
         this.paused = true;
       },
     };
+    this.animations.push(animation);
+    return animation;
   }
 }
 function walk(n) {
@@ -173,7 +177,7 @@ test("fixed plans deterministic; auto resolves randomness once, within actual CS
         const a = plan({ ...g, name }, size, kind, () => {
           throw Error("fixed plans must not randomize");
         });
-        assert.ok(a.duration >= 160 && a.duration <= 360);
+        assert.ok(a.duration >= 140 && a.duration <= 200);
         assert.ok((Math.abs(a.dx) * size) / 24 <= 3);
         assert.ok(g.body.includes(a.dropout.d));
         assert.ok(a.dropout.start + a.dropout.length <= 100);
@@ -192,8 +196,8 @@ test("A replaces full bottom image with masked base plus clipped translated real
   h.fire("pointerover");
   assert.equal(h.original.getAttribute("visibility"), "hidden");
   const nodes = walk(h.layer);
-  assert.equal(nodes.filter((n) => n.attrs.class === "source-gap").length, 1);
-  assert.equal(nodes.filter((n) => n.tag === "clipPath").length, 1);
+  assert.equal(nodes.filter((n) => n.attrs.class === "source-gap").length, 2);
+  assert.equal(nodes.filter((n) => n.tag === "clipPath").length, 2);
   assert.ok(nodes.find((n) => n.attrs.class === "rendered-base").attrs.mask);
   assert.equal(
     nodes.filter((n) => n.attrs.class === "signal-residue").length,
@@ -366,4 +370,79 @@ test("no scale/rotation/body spring scripts; send uses incremental append and na
   assert.ok(!message.includes("render();"));
   assert.ok(message.includes("restoreMessages(sentMessages.slice(-1))"));
   assert.ok(source.includes("!e.isComposing"));
+});
+
+test("second logical frame changes region, direction and dropout rather than repeating frame one", () => {
+  const a = plan({ ...geometry.attention, name: "attention" }, 24, 2);
+  const b = secondFrame(a, { width: 24, height: 24 });
+  assert.notDeepEqual(a.band, b.band);
+  assert.ok(a.dx * b.dx < 0);
+  assert.notEqual(a.dropout.start, b.dropout.start);
+  const h = harness();
+  h.controller.setScheme(2);
+  h.fire("click");
+  const frames = walk(h.layer).filter((n) => n.attrs.class === "fault-frame");
+  assert.equal(frames.length, 2);
+  assert.notEqual(
+    walk(frames[0]).find((n) => n.attrs.class === "source-gap").attrs.y,
+    walk(frames[1]).find((n) => n.attrs.class === "source-gap").attrs.y,
+  );
+});
+test("send surface replaces full button fill, restores v0.3 arrow, and cleans as one effect", () => {
+  const h = harness();
+  h.control.classes.add("send-launch");
+  h.original.append(new Node("path"), new Node("path"));
+  h.fire("click");
+  assert.ok(h.control.classes.has("surface-fault"));
+  const surface = walk(h.control).find((n) => n.attrs.class === "send-surface");
+  assert.ok(surface);
+  assert.ok(
+    walk(surface)
+      .filter((n) => n.tag === "path")
+      .every((n) => n.attrs.fill === "currentColor"),
+  );
+  assert.ok(walk(h.layer).some((n) => n.attrs.class === "send-trail"));
+  assert.equal(h.timers.size, 1);
+  h.controller.clearAll();
+  assert.ok(!h.control.classes.has("surface-fault"));
+  assert.ok(!walk(h.control).some((n) => n.attrs.class === "send-surface"));
+  assert.equal(h.layer.children.length, 0);
+});
+
+test("pointerdown responds immediately and the matching click continues the same batch", () => {
+  const h = harness();
+  h.fire("pointerdown");
+  const first = [...h.timers.keys()][0];
+  assert.ok(first);
+  assert.equal(h.original.getAttribute("visibility"), "hidden");
+  h.fire("click");
+  assert.equal([...h.timers.keys()][0], first);
+});
+test("send shaft, head and trail keep original v0.3 key positions at faster timing", () => {
+  const h = harness();
+  h.control.classes.add("send-launch");
+  h.original.append(new Node("path"), new Node("path"));
+  h.fire("click");
+  const shaft = h.original.children[0].animations[0],
+    head = h.original.children[1].animations[0];
+  assert.equal(head.options.duration, 420);
+  assert.equal(head.options.easing, "ease");
+  assert.ok(head.frames.some((f) => f.transform === "translateX(16px)"));
+  assert.ok(head.frames.some((f) => f.transform === "translateX(-8px)"));
+  assert.ok(shaft.frames.some((f) => f.transform === "scaleX(1.4)"));
+  h.fire("pointerout");
+  assert.ok(head.cancelled && shaft.cancelled);
+});
+test("freeze selector targets two distinct logical frames without replaying old input", () => {
+  const h = harness();
+  h.control.classes.add("study-trigger");
+  h.controller.setScheme(0);
+  h.controller.setFreeze(true);
+  h.controller.setFreezeFrame(1);
+  h.fire("click");
+  const frames = walk(h.layer).filter((n) => n.attrs.class === "fault-frame");
+  assert.equal(frames[0].animations[0].currentTime, 96);
+  assert.equal(frames[1].animations[0].currentTime, 96);
+  h.controller.setFreezeFrame(0);
+  assert.equal(h.layer.children.length, 0);
 });
