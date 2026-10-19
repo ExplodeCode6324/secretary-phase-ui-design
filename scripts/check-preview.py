@@ -21,7 +21,7 @@ class Links(HTMLParser):
                 errors.append(f'{self.source.relative_to(root)}: missing {value}')
 for path in root.rglob('*.html'):
     Links(path).feed(path.read_text())
-for path in [root/'prototype.js', root/'style.css', root/'index.html']:
+for path in [root/'prototype.js', root/'signal-motion.js', root/'style.css', root/'index.html']:
     text = path.read_text()
     if re.search(r'/Users/|/home/|[A-Z]:\\\\', text):
         errors.append(f'{path.name}: machine-specific path')

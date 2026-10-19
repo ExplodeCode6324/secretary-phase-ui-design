@@ -1,45 +1,128 @@
 /* Only a local visual study. No network requests and no backend mutations. */
-const paths = {
-  chat: "M4 4h16v12H10l-5 4v-4H4z M8 8h8 M8 11h5",
-  tasks: "M8 5H5v16h14V5h-3 M9 3h6v4H9z M8 13l3 3 5-6",
-  memory: "M5 3h14v18H5z M8 3v18 M11 8h5 M11 12h5 M11 16h3",
-  file: "M6 3h8l5 5v13H6z M14 3v6h5",
-  attention: "M12 3a6 6 0 0 0-6 6v6l-2 3h16l-2-3V9a6 6 0 0 0-6-6 M10 21h4",
-  settings: "M4 7h16 M4 17h16 M8 4v6 M16 14v6",
-  search: "M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14 M15 15l6 6",
-  send: "M4 12h15 M13 5l7 7-7 7",
-  plus: "M12 4v16 M4 12h16",
-  check: "M5 12l4 4L19 6",
-  arrow: "M5 12h14 M14 7l5 5-5 5",
-  motion: "M4 6h12v12H4z M8 3h12v12",
-  close: "M5 5l14 14 M19 5L5 19",
-};
+// Body paths never include helper rays, reticles, trails, or animation-only marks.
+// Sampling regions refer to normalized portions of these exact body paths.
 const geometry = {
-  chat: ["M4 4h16v12H10l-5 4v-4H4z", "M8 8h8", "M8 11h5"],
-  tasks: ["M8 5H5v16h14V5h-3", "M9 3h6v4H9z", "M8 13l3 3 5-6"],
-  memory: ["M5 3h14v18H5z", "M8 3v18", "M11 8h5 M11 12h5 M11 16h3"],
-  file: ["M6 3h8l5 5v13H6z", "M14 3v6h5", "M9 13h7 M9 17h5"],
-  attention: [
-    "M12 3a6 6 0 0 0-6 6v6l-2 3h16l-2-3V9a6 6 0 0 0-6-6",
-    "M10 21h4",
-    "M2 8v5 M22 8v5",
-  ],
-  settings: ["M4 7h16 M4 17h16", "M8 4v6", "M16 14v6"],
-  search: [
-    "M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14",
-    "M15 15l6 6",
-    "M6 10h8 M10 6v8",
-  ],
-  send: ["M4 12h15", "M13 5l7 7-7 7", "M2 8h6 M2 16h6"],
-  plus: ["M12 4v16", "M4 12h16", "M3 3h4 M3 3v4 M21 21h-4 M21 21v-4"],
-  check: ["M5 12l4 4L19 6", "M3 12h3", "M18 5h3"],
-  arrow: ["M5 12h14", "M14 7l5 5-5 5", "M2 12h2"],
-  motion: ["M4 6h12v12H4z", "M8 3h12v12", "M1 21h22"],
-  close: ["M5 5l14 14", "M19 5L5 19", "M3 3h18v18H3z"],
+  attention: {
+    body: ["M12 3a6 6 0 0 0-6 6v6l-2 3h16l-2-3V9a6 6 0 0 0-6-6", "M10 21h4"],
+    regions: [
+      [0, 12, 19],
+      [0, 39, 20],
+      [0, 65, 16],
+      [1, 5, 65],
+    ],
+  },
+  search: {
+    body: ["M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14", "M15 15l6 6"],
+    regions: [
+      [0, 10, 20],
+      [0, 42, 18],
+      [0, 70, 22],
+      [1, 15, 55],
+    ],
+  },
+  send: {
+    body: ["M4 12h15", "M13 5l7 7-7 7"],
+    regions: [
+      [0, 10, 35],
+      [1, 7, 25],
+      [1, 56, 28],
+      [0, 54, 28],
+    ],
+  },
+  chat: {
+    body: ["M4 4h16v12H10l-5 4v-4H4z", "M8 8h8", "M8 11h5"],
+    regions: [
+      [0, 15, 19],
+      [0, 40, 18],
+      [0, 66, 18],
+      [1, 20, 45],
+    ],
+  },
+  tasks: {
+    body: ["M8 5H5v16h14V5h-3", "M9 3h6v4H9z", "M8 13l3 3 5-6"],
+    regions: [
+      [0, 5, 18],
+      [0, 40, 20],
+      [1, 10, 25],
+      [2, 40, 35],
+    ],
+  },
+  memory: {
+    body: ["M5 3h14v18H5z", "M8 3v18", "M11 8h5 M11 12h5 M11 16h3"],
+    regions: [
+      [0, 10, 16],
+      [0, 43, 20],
+      [1, 20, 32],
+      [0, 72, 17],
+    ],
+  },
+  file: {
+    body: ["M6 3h8l5 5v13H6z", "M14 3v6h5", "M9 13h7 M9 17h5"],
+    regions: [
+      [0, 10, 17],
+      [0, 45, 20],
+      [1, 5, 35],
+      [0, 76, 15],
+    ],
+  },
+  settings: {
+    body: ["M4 7h16 M4 17h16", "M8 4v6", "M16 14v6"],
+    regions: [
+      [0, 3, 16],
+      [0, 58, 20],
+      [1, 10, 45],
+      [2, 20, 45],
+    ],
+  },
+  plus: {
+    body: ["M12 4v16", "M4 12h16"],
+    regions: [
+      [0, 5, 28],
+      [1, 55, 30],
+      [0, 58, 25],
+      [1, 5, 28],
+    ],
+  },
+  check: {
+    body: ["M5 12l4 4L19 6"],
+    regions: [
+      [0, 3, 23],
+      [0, 40, 20],
+      [0, 64, 26],
+      [0, 25, 24],
+    ],
+  },
+  arrow: {
+    body: ["M5 12h14", "M14 7l5 5-5 5"],
+    regions: [
+      [0, 5, 32],
+      [1, 5, 25],
+      [1, 57, 30],
+      [0, 55, 30],
+    ],
+  },
+  motion: {
+    body: ["M4 6h12v12H4z", "M8 3h12v12"],
+    regions: [
+      [0, 5, 18],
+      [1, 8, 22],
+      [0, 55, 20],
+      [1, 65, 25],
+    ],
+  },
+  close: {
+    body: ["M5 5l14 14", "M19 5L5 19"],
+    regions: [
+      [0, 5, 28],
+      [1, 58, 28],
+      [0, 60, 25],
+      [1, 8, 28],
+    ],
+  },
 };
 const icon = (name) => {
-  const parts = geometry[name] || geometry.file;
-  return `<span class="glyph glyph-${name}" aria-hidden="true"><svg viewBox="0 0 24 24"><g class="echo echo-a"><path d="${parts.join(" ")}"/></g><g class="echo echo-b"><path d="${parts.join(" ")}"/></g><g class="icon-body">${parts.map((d, i) => `<path class="part part-${i}" pathLength="100" d="${d}"/>`).join("")}</g><path class="raster-pass" d="M-6 5H30 M-6 11H30 M-6 17H30"/></svg></span>`;
+  const shape = geometry[name] || geometry.file;
+  return `<span class="glyph glyph-${name}" data-glyph="${name}" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><g class="icon-body">${shape.body.map((d) => `<path class="part" d="${d}"/>`).join("")}</g><g class="signal-layer" aria-hidden="true"></g></svg></span>`;
 };
 
 const escapeHTML = (v) =>
@@ -104,7 +187,7 @@ const state = (s) => `<span class="state ${statusClass(s)}">${s}</span>`;
 const button = (label, action, primary = false) =>
   `<button class="button ${primary ? "primary" : ""}" data-action="${action}">${label}</button>`;
 function heading(title, en, desc, action = "") {
-  return `<div class="page-heading"><div><div class="eyebrow">${en}</div><h1>${title}</h1><p>${desc}</p></div>${action}</div>`;
+  return `<div class="page-heading"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ""}</div>${action}</div>`;
 }
 const main = document.querySelector("#main");
 const dialog = document.querySelector("#dialog");
@@ -114,6 +197,7 @@ document
   .insertAdjacentHTML("afterbegin", icon("attention"));
 let renderedPage = null;
 function render() {
+  window.signalController?.clearAll();
   const valid = location.hash.slice(1);
   current = pages.some((p) => p[0] === valid) ? valid : "conversation";
   document.querySelector("#navigation").innerHTML = pages
@@ -132,7 +216,7 @@ function render() {
 let sentMessages = [],
   pendingAttention = true;
 function conversation() {
-  return `${heading("PERRI", "CONVERSATION", "对话记录与输入")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，界面的线条、图标和页面片段重新绘制。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><strong>界面设计语言 · v0.1</strong><small>MARKDOWN &nbsp; / &nbsp; 样式示例</small></div><button class="text-button" data-action="open-artifact">查看 ${icon("arrow")}</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary" type="submit">发送 ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物 <small>RECENT</small></h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作 <small>QUICK</small></h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
+  return `${heading("对话", "CONVERSATION", "")}<div class="conversation-layout"><section class="conversation" aria-label="对话记录"><div class="conversation-title">2026.10.19 <span>星期一</span></div><div id="messages"><article class="message"><div class="avatar">M</div><div><div class="message-meta"><strong>Master</strong><time>09:40</time></div><p>今天先把界面的设计语言整理清楚。</p><p>保留旧网页的排版秩序，交互时再露出一点蓝与浅蓝错位。<br>安静、清楚，像一个可以长久使用的私人工作空间。</p></div></article><article class="message"><div class="avatar assistant">P</div><div><div class="message-meta"><strong>PERRI</strong><time>09:41</time></div><p>先让信息各归其位，再让界面有自己的性格。</p><p>这一轮，我把设计收拢到三个层次：</p><ul><li>先用传统网页的导航、列表和表单组织信息。</li><li>暖白与墨色构成底色，蓝与浅蓝只停留在结构边缘。</li><li>交互时，本体保持稳定，派生信号片段短暂采样与重绘。</li></ul><div class="artifact-strip"><span class="file-icon">${icon("file")}</span><div><button class="text-button file-name" data-action="open-artifact">界面设计语言 · v0.1</button><small>Markdown · 今天 09:41 · 示例</small></div><button class="text-button" data-action="file-style-toggle" aria-pressed="false">对照卡片</button></div><div class="message-foot">${icon("check")} 示例对话 · 用于观察排版与阅读节奏</div></div></article></div><form class="composer" id="message-form"><div class="composer-box"><textarea id="message-input" aria-label="消息内容" placeholder="写下你的想法…" rows="2"></textarea><div class="composer-toolbar"><span>文字对话 <span aria-hidden="true">/</span> 不支持附件上传</span><button class="button primary" type="submit">发送 ${icon("send")}</button></div></div><div class="composer-help"><span>Enter 发送 · Shift + Enter 换行</span><span>仅演示输入与反馈</span></div></form></section><aside class="margin-notes"><section class="note-section"><h2 class="section-label">正在进行 <small>01</small></h2><button class="recent-item" data-action="task-01">${icon("tasks")}<span><strong>整理界面设计语言</strong><small>进行中 · 刚刚更新</small></span></button></section><section class="note-section"><h2 class="section-label">近期产物</h2><button class="recent-item" data-action="open-artifact">${icon("file")}<span><strong>界面设计语言 v0.1</strong><small>文档 · 今天 09:41</small></span></button><button class="recent-item" data-action="concept">${icon("file")}<span><strong>整体视觉概念图</strong><small>参考图 · 昨天</small></span></button></section><section class="note-section"><h2 class="section-label">快捷操作</h2><div class="quick-links"><button data-action="new-task">${icon("plus")}创建任务</button><button data-action="search">${icon("search")}查找内容</button></div></section></aside></div>`;
 }
 function tasksView() {
   const shown = tasks.filter(
@@ -141,7 +225,7 @@ function tasksView() {
   return `${heading("任务", "TASKS", "查看目标、执行状态与结果。", button(icon("plus") + " 创建任务", "new-task", true))}<div class="tabs" role="group" aria-label="任务筛选">${["全部", "进行中", "待决定", "已完成", "已停止"].map((x) => `<button class="tab ${taskFilter === x ? "active" : ""}" data-task-filter="${x}" aria-pressed="${taskFilter === x}">${x}</button>`).join("")}</div><div class="table-wrap"><table><thead><tr><th>任务</th><th>状态</th><th>更新于</th><th>操作</th></tr></thead><tbody>${shown.map((t) => `<tr><td>${escapeHTML(t.title)}<small>${escapeHTML(t.desc)}</small></td><td>${state(t.state)}</td><td><time>${t.date}</time></td><td><button class="text-button" data-expand-task="${t.id}" aria-expanded="false" aria-controls="detail-${t.id}">展开 ↓</button></td></tr><tr class="task-detail-row"><td colspan="4"><div class="list-drawer" id="detail-${t.id}" inert aria-hidden="true"><div class="drawer-clip"><div class="drawer-content"><span class="small-label">任务详情</span><h3>${escapeHTML(t.title)}</h3><p>${escapeHTML(t.desc)}</p><p>目标：保持信息结构清楚，让每一个操作有稳定、可见的反馈。</p><span class="muted">样式示例 · 未连接后端</span></div></div></div></td></tr>`).join("")}</tbody></table></div>${shown.length ? "" : '<div class="empty">这里暂时没有任务。</div>'}<p class="table-note">${shown.length} 项任务 · 示例内容，操作仅在当前预览中生效</p>`;
 }
 function memoryView() {
-  return `${heading("记忆", "MEMORY", "摘要、承诺与事实来源。")}<div class="tabs" role="group" aria-label="记忆分类">${["摘要", "承诺", "世界事实"].map((x) => `<button class="tab ${memoryFilter === x ? "active" : ""}" data-memory-filter="${x}" aria-pressed="${memoryFilter === x}">${x}</button>`).join("")}</div><div class="split-page"><section>${memoryFilter === "摘要" ? `<article class="record"><div class="record-meta">01 / DESIGN DIRECTION</div><h3>一个安静的私人工作空间</h3><p>用旧网页的方式组织信息。正文保持清晰，界面的媒介感来自平直边界、稀疏的双色标记和输入时的即时回应。</p><div class="record-actions"><button class="text-button" data-action="memory-source">查看来源 →</button><span class="muted">更新于今天 09:41</span></div></article><article class="record"><div class="record-meta">02 / CURRENT CONTEXT</div><h3>先完成样式，再确定技术实现</h3><p>当前阶段只探索布局、视觉与动效。页面中的内容和业务状态均为示例，后续依据完整技术选型实现。</p><button class="text-button" data-action="memory-source">查看来源 →</button></article>` : memoryFilter === "承诺" ? `<article class="record"><div class="record-meta">COMMITMENT / OPEN</div><h3>完成样式稿后交 Master 复核</h3><p>先观察主要页面的阅读节奏，再微调组件和交互动效。</p><button class="text-button" data-action="resolve-commitment">标记完成 →</button></article>` : `<article class="record"><div class="record-meta">PROJECT / 示例</div><h3>PERRI 界面探索</h3><p>当前阶段：视觉样式设计<br>设计方向：被模拟的旧互联网<br>参考资料：整体视觉概念图、动效分镜</p><button class="text-button" data-action="memory-source">查看事实来源 →</button></article>`}</section><aside><h2 class="section-label">关于记忆 <small>CONTEXT</small></h2><p class="quiet-note">摘要保存对话中的背景。<br>承诺记录需要继续跟进的事。<br>世界事实描述对象与它们的关系。</p><p class="muted">这是一组用于排版的示例。</p></aside></div>`;
+  return `${heading("记忆", "MEMORY", "摘要、承诺与事实来源。")}<div class="tabs" role="group" aria-label="记忆分类">${["摘要", "承诺", "世界事实"].map((x) => `<button class="tab ${memoryFilter === x ? "active" : ""}" data-memory-filter="${x}" aria-pressed="${memoryFilter === x}">${x}</button>`).join("")}</div><div class="split-page"><section>${memoryFilter === "摘要" ? `<article class="record"><div class="record-meta">01 / DESIGN DIRECTION</div><h3>一个安静的私人工作空间</h3><p>用旧网页的方式组织信息。正文保持清晰，界面的媒介感来自平直边界、稀疏的双色标记和输入时的即时回应。</p><div class="record-actions"><button class="text-button" data-action="memory-source">查看来源 →</button><span class="muted">更新于今天 09:41</span></div></article><article class="record"><div class="record-meta">02 / CURRENT CONTEXT</div><h3>先完成样式，再确定技术实现</h3><p>当前阶段只探索布局、视觉与动效。页面中的内容和业务状态均为示例，后续依据完整技术选型实现。</p><button class="text-button" data-action="memory-source">查看来源 →</button></article>` : memoryFilter === "承诺" ? `<article class="record"><div class="record-meta">COMMITMENT / OPEN</div><h3>完成样式稿后交 Master 复核</h3><p>先观察主要页面的阅读节奏，再微调组件和交互动效。</p><button class="text-button" data-action="resolve-commitment">标记完成 →</button></article>` : `<article class="record"><div class="record-meta">PROJECT / 示例</div><h3>PERRI 界面探索</h3><p>当前阶段：视觉样式设计<br>设计方向：被模拟的旧互联网<br>参考资料：整体视觉概念图、动效分镜</p><button class="text-button" data-action="memory-source">查看事实来源 →</button></article>`}</section><aside><h2 class="section-label">关于记忆</h2><p class="quiet-note">摘要保存对话中的背景。<br>承诺记录需要继续跟进的事。<br>世界事实描述对象与它们的关系。</p><p class="muted">这是一组用于排版的示例。</p></aside></div>`;
 }
 function artifactsView() {
   return `${heading("产物", "ARTIFACTS", "工作留下的结果，按时间归档。")}<div class="table-wrap"><table><thead><tr><th>名称</th><th>类型</th><th>来源</th><th>操作</th></tr></thead><tbody><tr><td>界面设计语言 · v0.1<small>布局、视觉与动效的共同约定</small></td><td>文档</td><td>整理界面设计语言</td><td><button class="text-button" data-action="open-artifact">查看 →</button></td></tr><tr><td>整体视觉概念图<small>暖白底色与文档式排版</small></td><td>图片</td><td>视觉参考</td><td><button class="text-button" data-action="concept">查看 →</button></td></tr><tr><td>动效分镜<small>接触、按下、释放与结果</small></td><td>图片</td><td>视觉参考</td><td><button class="text-button" data-action="storyboard">查看 →</button></td></tr></tbody></table></div><p class="table-note">3 项示例产物 · 本轮通过本地参考文件演示查看效果</p>`;
@@ -171,22 +255,27 @@ function settingsView() {
     )
     .join(
       "",
-    )}</div></div><div class="setting-row"><div><h3>暖白 / 墨色 / 蓝与浅蓝</h3><p>蓝与浅蓝用于常规交互；红色留给失败、重大设置变更与重点标记。</p><div class="theme-preview">${["#f5f2ea", "#fffcf6", "#262b31", "#285ea6", "#8bbde0"].map((c) => `<span class="swatch" style="background:${c}" title="${c}"></span>`).join("")}</div></div><a class="text-button" href="#motion">观察组件 →</a></div><h2 class="section-title">助手配置</h2><div class="setting-row"><div><h3>指令草稿</h3><p>编辑草稿 → 复核变更 → 应用配置。</p></div>${button("预览草稿样式", "settings-draft")}</div></section><aside><h2 class="section-label">本轮范围 <small>STUDY</small></h2><p class="quiet-note">外观选项只改变当前样式稿。<br>助手配置仅展示草稿与应用状态，不连接真实服务。</p></aside></div>`;
+    )}</div></div><div class="setting-row"><div><h3>暖白 / 墨色 / 蓝与浅蓝</h3><p>蓝与浅蓝用于常规交互；红色留给失败、重大设置变更与重点标记。</p><div class="theme-preview">${["#f5f2ea", "#fffcf6", "#262b31", "#285ea6", "#8bbde0"].map((c) => `<span class="swatch" style="background:${c}" title="${c}"></span>`).join("")}</div></div><a class="text-button" href="#motion">观察组件 →</a></div><h2 class="section-title">助手配置</h2><div class="setting-row"><div><h3>指令草稿</h3><p>编辑草稿 → 复核变更 → 应用配置。</p></div>${button("预览草稿样式", "settings-draft")}</div></section><aside><h2 class="section-label">本轮范围</h2><p class="quiet-note">外观选项只改变当前样式稿。<br>助手配置仅展示草稿与应用状态，不连接真实服务。</p></aside></div>`;
 }
+let sampleScheme = -1;
 const motionStudies = [
-  ["chat", "对话", "轮廓分行重建，文字短线逐条写回"],
-  ["tasks", "任务", "夹板弹开，勾选沿路径重新绘制"],
-  ["memory", "记忆", "索引页向外抽出，内容条目错时归档"],
-  ["file", "产物", "折角展开，页面以三段扫描重新显影"],
-  ["attention", "通知", "铃廓膨胀为波前，铃舌单独回弹"],
-  ["settings", "设置", "两枚滑块反向寻位，轨道保持稳定"],
-  ["search", "搜索", "镜片放大采样，十字定位后回到轮廓"],
-  ["send", "发送", "箭头脱离箭身，沿传输轨迹投射后复位"],
-  ["plus", "创建", "横纵笔画分轴展开，交点重新对齐"],
-  ["motion", "动效", "两层窗口拉开深度，再折回同一平面"],
+  ["attention", "通知", "铃侧短轮廓与底缘先后显影；铃体、铃舌原位不动"],
+  ["search", "搜索", "圆环局部与柄端采样；不放大镜片、不添加十字"],
+  ["send", "发送", "箭身短段与箭翼局部错位；箭头保持完整"],
+  ["chat", "对话", "气泡右边缘、底缘与文字短线的局部"],
+  ["tasks", "任务", "夹板边缘与勾选笔画的短段"],
+  ["memory", "记忆", "书脊及页面外缘的局部"],
+  ["file", "产物", "纸页边缘与折角轮廓的短段"],
+  ["settings", "设置", "轨道和调节点的局部；节点不移动"],
+  ["plus", "创建", "横纵笔画的端部"],
+  ["motion", "动效", "两层窗口边缘的局部"],
 ];
 function motionView() {
-  return `${heading("图标的模拟重构", "MOTION STUDY / 02", "移入、聚焦或点击图标，观察不同的重构方式。", '<a class="button" href="versions/v0.1/index.html#motion" target="_blank" rel="noopener">打开上一版 ↗</a>')}<div class="motion-intro"><p>同一个图标，两种表现。左侧为上一版统一分层；右侧按图标结构重新设计。</p><span class="muted">蓝色 / 浅蓝 · 单次 640–960 ms · 移出立即收束</span></div><div class="comparison-grid">${motionStudies.map(([i, label, description], n) => `<section class="comparison-cell"><div class="comparison-title"><span class="mono">${String(n + 1).padStart(2, "0")}</span><h2>${label}</h2></div><div class="comparison-pair"><button class="study-trigger legacy-sample" data-action="icon-demo" aria-label="上一版${label}动效">${icon(i)}<span>01 / 分层</span></button><button class="study-trigger" data-action="icon-demo" aria-label="新版${label}动效">${icon(i)}<span>02 / 重构</span></button></div><p>${description}</p></section>`).join("")}</div><h2 class="section-title">操作与结果</h2><div class="motion-grid"><section class="motion-cell"><h3>按下与释放</h3>${button(icon("send") + " 按住试试", "press-demo")}<p>按下冻结为压缩态，释放后重构。</p></section><section class="motion-cell"><h3>处理中 → 完成</h3>${button("运行示例", "run-success")}<p>扫描只作用于状态区。</p></section><section class="motion-cell"><h3>处理中 → 失败</h3>${button("失败示例", "run-error")}<p>失败才使用红色。</p></section><section class="motion-cell"><h3>面板展开</h3>${button("展开面板", "panel-demo")}<p>旧页面由三段水平扫描重新显影。</p></section><section class="motion-cell"><h3>键盘焦点</h3>${button("Tab 到这里", "focus-demo")}<p>焦点触发一次；稳定焦点框持续保留。</p></section><section class="motion-cell"><h3>不可用</h3><button class="button" disabled>不可用</button><p>禁用时不播放重构。</p></section></div><a href="#settings" class="text-button">调整动效强度 →</a>`;
+  return `${heading("信号采样", "", "本体始终稳定；移入、键盘聚焦或点击右侧样本，观察有限变化。")}
+<div class="motion-intro"><p>左侧为无信号的本体，右侧为同一轮廓派生的片段。片段只改变自身的位移、透明度和线宽。</p><div class="sample-options" role="group" aria-label="采样方案">${["自动", "方案一", "方案二", "方案三", "方案四"].map((label, i) => `<button class="text-button" data-sample-scheme="${i - 1}" aria-pressed="${i - 1 === sampleScheme}">${label}</button>`).join("")}</div><p id="sample-status" role="status">${sampleScheme < 0 ? "自动选择" : `方案 ${sampleScheme + 1}`} · 每次交互开始时选定，播放中不再改变</p></div>
+<div class="comparison-grid">${motionStudies.map(([name, label, description]) => `<section class="comparison-cell"><div class="comparison-title"><h2>${label}</h2></div><div class="comparison-pair"><button class="study-trigger static-sample" data-action="icon-demo" aria-label="${label}静态本体">${icon(name)}<span>静态本体</span></button><button class="study-trigger" data-action="icon-demo" aria-label="${label}信号采样">${icon(name)}<span>信号采样</span></button></div><p>${description}</p></section>`).join("")}</div>
+<h2 class="section-title">实际尺寸与操作</h2><div class="icon-study">${["attention", "search", "send"].map((name) => `<button data-action="icon-demo" aria-label="${name}小尺寸采样"><span class="small-icon">${icon(name)}</span>16 px</button>`).join("")}</div>
+<div class="motion-grid"><section class="motion-cell"><h3>按下与释放</h3>${button(icon("send") + " 按住试试", "press-demo")}<p>本体不缩小；按下清理片段，有效激活立即响应。</p></section><section class="motion-cell"><h3>处理中 → 完成</h3>${button("运行示例", "run-success")}<p>业务状态另行表达，不以采样表示成功。</p></section><section class="motion-cell"><h3>处理中 → 失败</h3>${button("失败示例", "run-error")}<p>失败使用红色和明确文字。</p></section><section class="motion-cell"><h3>面板展开</h3>${button("展开面板", "panel-demo")}<p>内容显影与状态独立。</p></section><section class="motion-cell"><h3>键盘焦点</h3>${button("Tab 到这里", "focus-demo")}<p>同次悬停与聚焦合并，焦点框保留。</p></section><section class="motion-cell"><h3>不可用</h3><button class="button" disabled>${icon("send")} 不可用</button><p>禁用不采样。</p></section></div><a class="text-button" href="#settings">调整动效强度 →</a>`;
 }
 
 const views = {
@@ -199,6 +288,7 @@ const views = {
   motion: motionView,
 };
 function openDialog(title, html) {
+  window.signalController?.clearAll();
   document.querySelector("#dialog-title").textContent = title;
   document.querySelector("#dialog-content").innerHTML = html;
   if (!dialog.open) dialog.showModal();
@@ -232,7 +322,15 @@ function searchResults(query = "") {
     : '<p class="empty">没有匹配的页面。</p>';
 }
 const actions = {
+  "file-style-toggle": (el) => {
+    const card = document
+      .querySelector(".artifact-strip")
+      .classList.toggle("artifact-card-trial");
+    el.setAttribute("aria-pressed", String(card));
+    el.textContent = card ? "返回文件条目" : "对照卡片";
+  },
   "surface-toggle": (el) => {
+    window.signalController?.clearAll();
     const off = document.body.classList.toggle("plain-surface");
     el.textContent = "模拟动效：" + (off ? "关" : "开");
     el.setAttribute("aria-pressed", String(!off));
@@ -349,6 +447,7 @@ function chooseMotion(value) {
   );
 }
 function applyAppearance() {
+  window.signalController?.clearAll();
   document.body.classList.toggle("wireframe", appearance === "wireframe");
   document.body.classList.toggle("motion-off", motion === "off");
   document.body.classList.toggle("motion-reduced", motion === "reduced");
@@ -389,6 +488,15 @@ document.addEventListener("click", (e) => {
           `<div class="record-meta">TASK / ${t.id}</div><p>${escapeHTML(t.desc)}</p>${state(t.state)}<h3 class="section-title">目标与结果</h3><p>保持信息结构清楚，让每一个操作有可见、稳定的反馈。</p><p class="dialog-description">任务详情样式示例。</p>`,
         );
     } else actions[action]?.(target);
+  }
+  if (target.dataset.sampleScheme) {
+    sampleScheme = Number(target.dataset.sampleScheme);
+    signalController.setScheme(sampleScheme);
+    document
+      .querySelectorAll("[data-sample-scheme]")
+      .forEach((el) => el.setAttribute("aria-pressed", String(el === target)));
+    document.querySelector("#sample-status").textContent =
+      target.textContent + " · 下次接触时使用";
   }
   if (target.dataset.expandTask) {
     const expanded = target.getAttribute("aria-expanded") !== "true";
@@ -493,37 +601,16 @@ document.addEventListener("keydown", (e) => {
 window.addEventListener("hashchange", render);
 render();
 
-// Motion only: each glyph follows its own geometry; no business state is inferred.
-const simulationTimers = new WeakMap();
-function simulate(control) {
-  if (control.matches(":disabled") || control.closest(".legacy-sample")) return;
-  clearTimeout(simulationTimers.get(control));
-  control.classList.remove("is-simulating");
-  void control.offsetWidth;
-  control.classList.add("is-simulating");
-  simulationTimers.set(
-    control,
-    setTimeout(() => control.classList.remove("is-simulating"), 1000),
-  );
-}
-document.addEventListener("pointerover", (e) => {
-  const c = e.target.closest("button,a");
-  if (c && !c.contains(e.relatedTarget)) simulate(c);
-});
-document.addEventListener("pointerout", (e) => {
-  const c = e.target.closest("button,a");
-  if (c && !c.contains(e.relatedTarget)) {
-    c.classList.remove("is-simulating");
-    clearTimeout(simulationTimers.get(c));
-  }
-});
-document.addEventListener("focusin", (e) => {
-  const c = e.target.closest("button,a");
-  if (c) simulate(c);
-});
-document.addEventListener("click", (e) => {
-  const c = e.target.closest("button,a");
-  if (c) simulate(c);
+// One controller owns all decoration and its lifecycle; business listeners stay native.
+window.signalController = PhaseSignalMotion.createController({
+  document,
+  window,
+  geometry,
+  onSample: ({ scheme, count, duration }) => {
+    const status = document.querySelector("#sample-status");
+    if (status)
+      status.textContent = `方案 ${scheme + 1} · ${count} 个派生片段 · ${duration} ms · 本体不变`;
+  },
 });
 
 function setTheme(theme) {
@@ -540,11 +627,3 @@ try {
   savedTheme = localStorage.getItem("phase-ui-theme") || "light";
 } catch {}
 setTheme(savedTheme === "dark" ? "dark" : "light");
-document.addEventListener("click", (e) => {
-  const button = e.target.closest("button");
-  if (!button || button.disabled) return;
-  button.classList.remove("commit-pulse");
-  void button.offsetWidth;
-  button.classList.add("commit-pulse");
-  setTimeout(() => button.classList.remove("commit-pulse"), 360);
-});
